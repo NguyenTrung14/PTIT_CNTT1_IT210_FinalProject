@@ -1,15 +1,27 @@
 package com.example.javaweb_congthongtinbenhvien.config;
 
-import com.example.javaweb_congthongtinbenhvien.entity.*;
-import com.example.javaweb_congthongtinbenhvien.entity.enums.*;
-import com.example.javaweb_congthongtinbenhvien.repository.*;
+import com.example.javaweb_congthongtinbenhvien.entity.Doctor;
+import com.example.javaweb_congthongtinbenhvien.entity.Medicine;
+import com.example.javaweb_congthongtinbenhvien.entity.Specialty;
+import com.example.javaweb_congthongtinbenhvien.entity.TestType;
+import com.example.javaweb_congthongtinbenhvien.entity.User;
+import com.example.javaweb_congthongtinbenhvien.entity.UserProfile;
+import com.example.javaweb_congthongtinbenhvien.entity.enums.Gender;
+import com.example.javaweb_congthongtinbenhvien.entity.enums.MedicineStatus;
+import com.example.javaweb_congthongtinbenhvien.entity.enums.Role;
+import com.example.javaweb_congthongtinbenhvien.entity.enums.UserStatus;
+import com.example.javaweb_congthongtinbenhvien.repository.DoctorRepository;
+import com.example.javaweb_congthongtinbenhvien.repository.MedicineRepository;
+import com.example.javaweb_congthongtinbenhvien.repository.SpecialtyRepository;
+import com.example.javaweb_congthongtinbenhvien.repository.TestTypeRepository;
+import com.example.javaweb_congthongtinbenhvien.repository.UserProfileRepository;
+import com.example.javaweb_congthongtinbenhvien.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
 @Component
 @RequiredArgsConstructor
@@ -66,7 +78,6 @@ public class DataSeeder implements CommandLineRunner {
         Specialty specialty = new Specialty();
         specialty.setName(name);
         specialty.setDescription(description);
-        specialty.setStatus(CommonStatus.ACTIVE);
 
         specialtyRepository.save(specialty);
     }
@@ -101,7 +112,6 @@ public class DataSeeder implements CommandLineRunner {
         TestType testType = new TestType();
         testType.setName(name);
         testType.setDescription(description);
-        testType.setStatus(CommonStatus.ACTIVE);
 
         testTypeRepository.save(testType);
     }
@@ -174,10 +184,7 @@ public class DataSeeder implements CommandLineRunner {
         createProfileIfNotExists(
                 admin,
                 Gender.MALE,
-                LocalDate.of(1990, 1, 1),
-                "Hà Nội",
-                "001199000001",
-                null
+                "Hà Nội"
         );
 
         User doctorUser = createUserIfNotExists(
@@ -191,10 +198,7 @@ public class DataSeeder implements CommandLineRunner {
         createProfileIfNotExists(
                 doctorUser,
                 Gender.MALE,
-                LocalDate.of(1985, 5, 10),
-                "Hà Nội",
-                "001198500002",
-                null
+                "Hà Nội"
         );
 
         User patient = createUserIfNotExists(
@@ -208,10 +212,7 @@ public class DataSeeder implements CommandLineRunner {
         createProfileIfNotExists(
                 patient,
                 Gender.MALE,
-                LocalDate.of(2003, 8, 15),
-                "Hà Nội",
-                "001200300003",
-                "BH123456"
+                "Hà Nội"
         );
 
         createDoctorIfNotExists(doctorUser);
@@ -240,10 +241,7 @@ public class DataSeeder implements CommandLineRunner {
     private void createProfileIfNotExists(
             User user,
             Gender gender,
-            LocalDate dateOfBirth,
-            String address,
-            String identityNumber,
-            String healthInsuranceCode
+            String address
     ) {
         if (userProfileRepository.findByUserId(user.getId()).isPresent()) {
             return;
@@ -252,11 +250,7 @@ public class DataSeeder implements CommandLineRunner {
         UserProfile profile = new UserProfile();
         profile.setUser(user);
         profile.setGender(gender);
-        profile.setDateOfBirth(dateOfBirth);
         profile.setAddress(address);
-        profile.setIdentityNumber(identityNumber);
-        profile.setHealthInsuranceCode(healthInsuranceCode);
-        profile.setEmergencyContact("0909999999");
 
         userProfileRepository.save(profile);
     }
@@ -272,11 +266,7 @@ public class DataSeeder implements CommandLineRunner {
         Doctor doctor = new Doctor();
         doctor.setUser(doctorUser);
         doctor.setSpecialty(specialty);
-        doctor.setDegree("Thạc sĩ Y khoa");
         doctor.setExperienceYears(8);
-        doctor.setRoomNumber("P101");
-        doctor.setDescription("Bác sĩ chuyên khoa Nội tổng quát");
-        doctor.setStatus(CommonStatus.ACTIVE);
 
         doctorRepository.save(doctor);
     }

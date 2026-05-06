@@ -1,9 +1,93 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Book Appointment</title>
+    <meta charset="UTF-8">
+    <title>Đặt lịch khám</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
 </head>
 <body>
-    <h1>Book Appointment</h1>
+<div class="container mt-4">
+    <h2>Đặt lịch khám</h2>
+
+    <a th:href="@{/patient/appointments}" class="btn btn-secondary btn-sm mb-3">Lịch khám của tôi</a>
+
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <form th:action="@{/patient/appointments/book}" th:object="${appointment}" method="post" class="card p-4">
+        <input type="hidden" th:field="*{patientId}">
+
+        <div class="mb-3">
+            <label class="form-label">Chuyên khoa</label>
+            <select id="specialtySelect" class="form-select" required>
+                <option value="">-- Chọn chuyên khoa --</option>
+                <option th:each="specialty : ${specialties}"
+                        th:value="${specialty.id}"
+                        th:text="${specialty.name}">
+                </option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Bác sĩ</label>
+            <select id="doctorSelect" th:field="*{doctorId}" class="form-select" required>
+                <option value="">-- Chọn bác sĩ --</option>
+                <option th:each="doctor : ${doctors}"
+                        th:value="${doctor.id}"
+                        th:data-specialty-id="${doctor.specialty.id}"
+                        th:text="${doctor.user.fullName + ' - ' + doctor.specialty.name + ' - Phòng ' + doctor.roomNumber}">
+                </option>
+            </select>
+            <small class="text-muted">Danh sách bác sĩ sẽ thay đổi theo chuyên khoa đã chọn.</small>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Ngày khám</label>
+            <input type="date" th:field="*{appointmentDate}" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Giờ bắt đầu</label>
+            <input type="time" th:field="*{startTime}" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Giờ kết thúc</label>
+            <input type="time" th:field="*{endTime}" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Lý do khám</label>
+            <textarea th:field="*{reason}" class="form-control" rows="3"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Đặt lịch</button>
+    </form>
+</div>
+
+<script>
+    const specialtySelect = document.getElementById("specialtySelect");
+    const doctorSelect = document.getElementById("doctorSelect");
+    const doctorOptions = Array.from(doctorSelect.options);
+
+    function filterDoctors() {
+        const specialtyId = specialtySelect.value;
+
+        doctorSelect.value = "";
+
+        doctorOptions.forEach((option, index) => {
+            if (index === 0) {
+                option.hidden = false;
+                return;
+            }
+
+            const optionSpecialtyId = option.getAttribute("data-specialty-id");
+            option.hidden = specialtyId !== "" && optionSpecialtyId !== specialtyId;
+        });
+    }
+
+    specialtySelect.addEventListener("change", filterDoctors);
+    filterDoctors();
+</script>
 </body>
 </html>

@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-4">
+    <h2>Admin Dashboard</h2>
+
+    <p>
+        Xin chào,
+        <b th:text="${loginUser.fullName}"></b>
+    </p>
+
+    <div class="mb-3">
+        <a th:href="@{/admin/profile}" class="btn btn-primary btn-sm">Hồ sơ cá nhân</a>
+        <a th:href="@{/admin/medicines}" class="btn btn-success btn-sm">Quản lý thuốc</a>
+        <a th:href="@{/admin/prescriptions/waiting}" class="btn btn-warning btn-sm">Đơn thuốc chờ cấp phát</a>
+        <a th:href="@{/logout}" class="btn btn-danger btn-sm">Đăng xuất</a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card p-3">
+                <h5>Người dùng</h5>
+                <h3 th:text="${#lists.size(users)}"></h3>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card p-3">
+                <h5>Thuốc đang hoạt động</h5>
+                <h3 th:text="${#lists.size(medicines)}"></h3>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card p-3">
+                <h5>Đơn chờ cấp phát</h5>
+                <h3 th:text="${#lists.size(waitingPrescriptions)}"></h3>
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <h4>Đơn thuốc chờ cấp phát gần đây</h4>
+
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th>Mã đơn</th>
+            <th>Bệnh nhân</th>
+            <th>Bác sĩ</th>
+            <th>Trạng thái</th>
+            <th>Thao tác</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="prescription : ${waitingPrescriptions}">
+            <td th:text="${prescription.id}"></td>
+            <td th:text="${prescription.medicalRecord.patient.fullName}"></td>
+            <td th:text="${prescription.medicalRecord.doctor.user.fullName}"></td>
+            <td th:text="${prescription.status}"></td>
+            <td>
+                <a th:href="@{/admin/prescriptions/detail/{id}(id=${prescription.id})}"
+                   class="btn btn-info btn-sm">
+                    Chi tiết
+                </a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

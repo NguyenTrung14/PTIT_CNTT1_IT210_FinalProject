@@ -1,8 +1,9 @@
 package com.example.javaweb_congthongtinbenhvien.entity.enums;
 
 public enum PaymentStatus {
-    PENDING,
-    PAID,
-    FAILED,
-    REFUNDED
+    PENDING,        // Chờ thanh toán
+    PAID,           // Đã thanh toán
+    FAILED,         // Thanh toán thất bại
+    CANCELLED,      // Đã hủy
+    REFUNDED        // Đã hoàn tiền
 }

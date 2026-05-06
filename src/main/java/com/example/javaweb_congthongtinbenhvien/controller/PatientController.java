@@ -14,7 +14,12 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -41,36 +46,33 @@ public class PatientController {
     @GetMapping("/profile")
     public String profileForm(Model model, HttpSession session) {
         User loginUser = (User) session.getAttribute("loginUser");
+
         User user = userService.findById(loginUser.getId());
-        UserProfile profile = userService.findProfileByUserId(user.getId());
+        UserProfile userProfile = userService.findProfileByUserId(user.getId());
 
-        ProfileRequest request = new ProfileRequest();
-        request.setUserId(user.getId());
-        request.setFullName(user.getFullName());
-        request.setPhone(user.getPhone());
-        request.setGender(profile.getGender());
-        request.setDateOfBirth(profile.getDateOfBirth());
-        request.setAddress(profile.getAddress());
-        request.setIdentityNumber(profile.getIdentityNumber());
-        request.setHealthInsuranceCode(profile.getHealthInsuranceCode());
-        request.setEmergencyContact(profile.getEmergencyContact());
+        ProfileRequest profile = new ProfileRequest();
+        profile.setUserId(user.getId());
+        profile.setFullName(user.getFullName());
+        profile.setPhone(user.getPhone());
+        profile.setGender(userProfile.getGender());
+        profile.setAddress(userProfile.getAddress());
 
-        model.addAttribute("profile", request);
+        model.addAttribute("profile", profile);
 
         return "patient/profile";
     }
 
     @PostMapping("/profile")
     public String updateProfile(
-            @ModelAttribute("profile") ProfileRequest request,
+            @ModelAttribute("profile") ProfileRequest profile,
             HttpSession session,
             RedirectAttributes redirectAttributes
     ) {
         try {
             User loginUser = (User) session.getAttribute("loginUser");
-            request.setUserId(loginUser.getId());
+            profile.setUserId(loginUser.getId());
 
-            userService.updateProfile(request);
+            userService.updateProfile(profile);
 
             User updatedUser = userService.findById(loginUser.getId());
             session.setAttribute("loginUser", updatedUser);

@@ -6,53 +6,73 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @Entity
-@Table(name = "medicines")
+@Table(
+        name = "medicines",
+        indexes = {
+                @Index(name = "idx_medicines_name", columnList = "name"),
+                @Index(name = "idx_medicines_status", columnList = "status")
+        }
+)
 public class Medicine {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 100)
+    // CORE-04: Admin CRUD danh mục thuốc
+    @Column(nullable = false, unique = true, length = 150)
     private String name;
 
-    @Column(columnDefinition = "text")
-    private String description;
-
-    @Column(name = "stock_quantity", nullable = false)
-    private Integer stockQuantity = 0;
-
+    // Ví dụ: viên, chai, gói, hộp
     @Column(nullable = false, length = 50)
     private String unit;
 
-    @Column(nullable = false, precision = 10, scale = 2)
+    @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal price = BigDecimal.ZERO;
 
+    // CORE-08: quản lý tồn kho thuốc
+    @Column(name = "stock_quantity", nullable = false)
+    private Integer stockQuantity = 0;
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     private MedicineStatus status = MedicineStatus.ACTIVE;
 
-    @OneToMany(mappedBy = "medicine")
-    private List<PrescriptionDetail> prescriptionDetails = new ArrayList<>();
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 
     @PrePersist
     public void prePersist() {
-        if (stockQuantity == null) {
-            stockQuantity = 0;
-        }
+        LocalDateTime now = LocalDateTime.now();
+        createdAt = now;
+        updatedAt = now;
 
         if (price == null) {
             price = BigDecimal.ZERO;
         }
 
+        if (stockQuantity == null) {
+            stockQuantity = 0;
+        }
+
         if (status == null) {
             status = MedicineStatus.ACTIVE;
         }
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        updatedAt = LocalDateTime.now();
     }
 }

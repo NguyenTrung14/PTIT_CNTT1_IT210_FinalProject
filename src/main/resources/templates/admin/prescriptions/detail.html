@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Chi tiết đơn thuốc</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-4">
+    <h2>Chi tiết đơn thuốc</h2>
+
+    <a th:href="@{/admin/prescriptions/waiting}" class="btn btn-secondary btn-sm mb-3">
+        Quay lại danh sách
+    </a>
+
+    <div class="card p-3 mb-3">
+        <p><b>Mã đơn thuốc:</b> <span th:text="${prescription.id}"></span></p>
+        <p><b>Trạng thái:</b> <span th:text="${prescription.status}"></span></p>
+        <p><b>Bệnh nhân:</b> <span th:text="${prescription.medicalRecord.patient.fullName}"></span></p>
+        <p><b>Bác sĩ:</b> <span th:text="${prescription.medicalRecord.doctor.user.fullName}"></span></p>
+        <p><b>Chẩn đoán:</b> <span th:text="${prescription.medicalRecord.diagnosis}"></span></p>
+        <p><b>Ngày tạo:</b> <span th:text="${#temporals.format(prescription.createdAt, 'dd/MM/yyyy HH:mm')}"></span></p>
+
+        <p th:if="${prescription.dispensedAt != null}">
+            <b>Ngày cấp phát:</b>
+            <span th:text="${#temporals.format(prescription.dispensedAt, 'dd/MM/yyyy HH:mm')}"></span>
+        </p>
+
+        <p th:if="${prescription.dispensedBy != null}">
+            <b>Người cấp phát:</b>
+            <span th:text="${prescription.dispensedBy.fullName}"></span>
+        </p>
+    </div>
+
+    <h5>Danh sách thuốc</h5>
+
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th>Tên thuốc</th>
+            <th>Đơn vị</th>
+            <th>Tồn kho hiện tại</th>
+            <th>Số lượng kê</th>
+            <th>Liều dùng</th>
+            <th>Hướng dẫn sử dụng</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="detail : ${prescription.details}">
+            <td th:text="${detail.medicine.name}"></td>
+            <td th:text="${detail.medicine.unit}"></td>
+            <td th:text="${detail.medicine.stockQuantity}"></td>
+            <td th:text="${detail.quantity}"></td>
+            <td th:text="${detail.dosage}"></td>
+            <td th:text="${detail.usageInstruction}"></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <a th:if="${prescription.status.name() == 'WAITING_DISPENSE'}"
+       th:href="@{/admin/prescriptions/dispense/{id}(id=${prescription.id})}"
+       class="btn btn-success"
+       onclick="return confirm('Xác nhận cấp phát thuốc và trừ tồn kho?')">
+        Xác nhận phát thuốc
+    </a>
+</div>
+</body>
+</html>

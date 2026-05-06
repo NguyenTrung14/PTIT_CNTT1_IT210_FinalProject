@@ -1,8 +1,8 @@
 package com.example.javaweb_congthongtinbenhvien.entity.enums;
 
 public enum PaymentMethod {
-    CASH,
-    BANK_TRANSFER,
-    MOMO,
-    VNPAY
+    CASH,           // Tiền mặt
+    VNPAY,          // VNPay
+    MOMO,           // Momo
+    BANK_TRANSFER   // Chuyển khoản
 }

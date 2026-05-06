@@ -12,31 +12,41 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
-@Table(name = "prescriptions")
+@Table(
+        name = "prescriptions",
+        indexes = {
+                @Index(name = "idx_prescriptions_medical_record_id", columnList = "medical_record_id"),
+                @Index(name = "idx_prescriptions_status", columnList = "status")
+        }
+)
 public class Prescription {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Một bệnh án có một đơn thuốc
     @OneToOne
-    @JoinColumn(name = "record_id", nullable = false, unique = true)
+    @JoinColumn(name = "medical_record_id", nullable = false, unique = true)
     private MedicalRecord medicalRecord;
 
+    // CORE-08: sau khi kê đơn -> chờ cấp phát
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 30)
     private PrescriptionStatus status = PrescriptionStatus.WAITING_DISPENSE;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "dispensed_at")
     private LocalDateTime dispensedAt;
 
+    // Admin hoặc bác sĩ xác nhận phát thuốc
     @ManyToOne
     @JoinColumn(name = "dispensed_by")
     private User dispensedBy;
 
+    // Một đơn thuốc có nhiều chi tiết thuốc
     @OneToMany(mappedBy = "prescription", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PrescriptionDetail> details = new ArrayList<>();
 
@@ -47,5 +57,15 @@ public class Prescription {
         if (status == null) {
             status = PrescriptionStatus.WAITING_DISPENSE;
         }
+    }
+
+    public void addDetail(PrescriptionDetail detail) {
+        details.add(detail);
+        detail.setPrescription(this);
+    }
+
+    public void removeDetail(PrescriptionDetail detail) {
+        details.remove(detail);
+        detail.setPrescription(null);
     }
 }

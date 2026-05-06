@@ -12,33 +12,73 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Entity
-@Table(name = "payments")
+@Table(
+        name = "payments",
+        indexes = {
+                @Index(name = "idx_payments_patient_id", columnList = "patient_id"),
+                @Index(name = "idx_payments_appointment_id", columnList = "appointment_id"),
+                @Index(name = "idx_payments_status", columnList = "status"),
+                @Index(name = "idx_payments_transaction_code", columnList = "transaction_code")
+        }
+)
 public class Payment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Người thanh toán, thường là bệnh nhân
+    @ManyToOne
+    @JoinColumn(name = "patient_id", nullable = false)
+    private User patient;
+
+    // Thanh toán cho lịch khám nào
+    // OneToOne để mỗi lịch khám chỉ có 1 giao dịch chính
     @OneToOne
     @JoinColumn(name = "appointment_id", nullable = false, unique = true)
     private Appointment appointment;
 
-    @Column(nullable = false, precision = 10, scale = 2)
+    @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal amount = BigDecimal.ZERO;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 30)
     private PaymentMethod method = PaymentMethod.CASH;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 30)
     private PaymentStatus status = PaymentStatus.PENDING;
 
-    @Column(name = "transaction_time")
-    private LocalDateTime transactionTime;
+    // Mã giao dịch nội bộ hoặc mã từ VNPay/Momo
+    @Column(name = "transaction_code", unique = true, length = 100)
+    private String transactionCode;
+
+    // Nội dung thanh toán
+    @Column(length = 255)
+    private String description;
+
+    // Lý do thất bại hoặc ghi chú hoàn tiền
+    @Column(name = "failure_reason", columnDefinition = "TEXT")
+    private String failureReason;
+
+    @Column(name = "paid_at")
+    private LocalDateTime paidAt;
+
+    @Column(name = "refunded_at")
+    private LocalDateTime refundedAt;
+
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 
     @PrePersist
     public void prePersist() {
+        LocalDateTime now = LocalDateTime.now();
+        createdAt = now;
+        updatedAt = now;
+
         if (amount == null) {
             amount = BigDecimal.ZERO;
         }
@@ -50,9 +90,10 @@ public class Payment {
         if (status == null) {
             status = PaymentStatus.PENDING;
         }
+    }
 
-        if (transactionTime == null) {
-            transactionTime = LocalDateTime.now();
-        }
+    @PreUpdate
+    public void preUpdate() {
+        updatedAt = LocalDateTime.now();
     }
 }

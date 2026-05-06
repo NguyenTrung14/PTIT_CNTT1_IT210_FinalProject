@@ -5,9 +5,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Getter
 @Setter
 @Entity
@@ -18,18 +15,16 @@ public class Specialty {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Ví dụ: Tim mạch, Da liễu, Nhi khoa
     @Column(nullable = false, unique = true, length = 100)
     private String name;
 
-    @Column(columnDefinition = "text")
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     private CommonStatus status = CommonStatus.ACTIVE;
-
-    @OneToMany(mappedBy = "specialty")
-    private List<Doctor> doctors = new ArrayList<>();
 
     @PrePersist
     public void prePersist() {

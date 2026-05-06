@@ -40,11 +40,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                 request.getAppointmentDate(),
                 request.getStartTime(),
                 request.getEndTime(),
-                List.of(
-                        AppointmentStatus.PENDING,
-                        AppointmentStatus.CONFIRMED,
-                        AppointmentStatus.WAITING
-                )
+                List.of(AppointmentStatus.WAITING)
         );
 
         if (exists) {
@@ -58,7 +54,6 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.setStartTime(request.getStartTime());
         appointment.setEndTime(request.getEndTime());
         appointment.setReason(request.getReason());
-
         appointment.setStatus(AppointmentStatus.WAITING);
 
         return appointmentRepository.save(appointment);
