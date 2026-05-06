@@ -7,7 +7,8 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -20,9 +21,13 @@ public class PrescriptionController {
             "/admin/prescriptions/waiting",
             "/doctor/prescriptions/waiting"
     })
-    public String waiting(Model model, HttpServletRequest request) {
+    public String waiting(
+            Model model,
+            HttpServletRequest request
+    ) {
         model.addAttribute("prescriptions", prescriptionService.findWaitingDispense());
         model.addAttribute("basePath", getBasePath(request));
+
         return "admin/prescriptions/waiting";
     }
 
@@ -37,6 +42,7 @@ public class PrescriptionController {
     ) {
         model.addAttribute("prescription", prescriptionService.findById(id));
         model.addAttribute("basePath", getBasePath(request));
+
         return "admin/prescriptions/detail";
     }
 
@@ -54,6 +60,12 @@ public class PrescriptionController {
 
         try {
             User loginUser = (User) session.getAttribute("loginUser");
+
+            if (loginUser == null) {
+                redirectAttributes.addFlashAttribute("error", "Bạn cần đăng nhập");
+                return "redirect:/auth/login";
+            }
+
             prescriptionService.dispensePrescription(id, loginUser.getId());
             redirectAttributes.addFlashAttribute("success", "Cấp phát thuốc thành công");
         } catch (RuntimeException e) {

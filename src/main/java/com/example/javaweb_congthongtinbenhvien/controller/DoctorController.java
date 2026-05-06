@@ -15,11 +15,7 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -34,11 +30,12 @@ public class DoctorController {
     private final UserService userService;
 
     @GetMapping("/dashboard")
-    public String dashboard(Model model, HttpSession session) {
-        User loginUser = (User) session.getAttribute("loginUser");
-
-        Doctor doctor = doctorRepository.findByUserId(loginUser.getId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy thông tin bác sĩ"));
+    public String dashboard(
+            Model model,
+            HttpSession session
+    ) {
+        User loginUser = getLoginUser(session);
+        Doctor doctor = getDoctorByLoginUser(loginUser);
 
         model.addAttribute("loginUser", loginUser);
         model.addAttribute("doctor", doctor);
@@ -48,21 +45,24 @@ public class DoctorController {
     }
 
     @GetMapping("/profile")
-    public String profileForm(Model model, HttpSession session) {
-        User loginUser = (User) session.getAttribute("loginUser");
-
+    public String profileForm(
+            Model model,
+            HttpSession session
+    ) {
+        User loginUser = getLoginUser(session);
         User user = userService.findById(loginUser.getId());
         UserProfile userProfile = userService.findProfileByUserId(user.getId());
-
-        Doctor doctor = doctorRepository.findByUserId(user.getId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy thông tin bác sĩ"));
+        Doctor doctor = getDoctorByLoginUser(user);
 
         ProfileRequest profile = new ProfileRequest();
         profile.setUserId(user.getId());
         profile.setFullName(user.getFullName());
         profile.setPhone(user.getPhone());
-        profile.setGender(userProfile.getGender());
-        profile.setAddress(userProfile.getAddress());
+
+        if (userProfile != null) {
+            profile.setGender(userProfile.getGender());
+            profile.setAddress(userProfile.getAddress());
+        }
 
         model.addAttribute("profile", profile);
         model.addAttribute("doctor", doctor);
@@ -77,9 +77,9 @@ public class DoctorController {
             RedirectAttributes redirectAttributes
     ) {
         try {
-            User loginUser = (User) session.getAttribute("loginUser");
-            profile.setUserId(loginUser.getId());
+            User loginUser = getLoginUser(session);
 
+            profile.setUserId(loginUser.getId());
             userService.updateProfile(profile);
 
             User updatedUser = userService.findById(loginUser.getId());
@@ -94,11 +94,12 @@ public class DoctorController {
     }
 
     @GetMapping("/appointments")
-    public String appointments(Model model, HttpSession session) {
-        User loginUser = (User) session.getAttribute("loginUser");
-
-        Doctor doctor = doctorRepository.findByUserId(loginUser.getId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy thông tin bác sĩ"));
+    public String appointments(
+            Model model,
+            HttpSession session
+    ) {
+        User loginUser = getLoginUser(session);
+        Doctor doctor = getDoctorByLoginUser(loginUser);
 
         model.addAttribute("appointments", appointmentService.findByDoctorId(doctor.getId()));
 
@@ -109,17 +110,17 @@ public class DoctorController {
     public String examineForm(
             @PathVariable Long appointmentId,
             Model model,
-            HttpSession session
+            HttpSession session,
+            RedirectAttributes redirectAttributes
     ) {
-        User loginUser = (User) session.getAttribute("loginUser");
-
-        Doctor doctor = doctorRepository.findByUserId(loginUser.getId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy thông tin bác sĩ"));
+        User loginUser = getLoginUser(session);
+        Doctor doctor = getDoctorByLoginUser(loginUser);
 
         Appointment appointment = appointmentService.findById(appointmentId);
 
         if (!appointment.getDoctor().getId().equals(doctor.getId())) {
-            return "redirect:/error/403";
+            redirectAttributes.addFlashAttribute("error", "Bạn không có quyền khám lịch này");
+            return "redirect:/doctor/appointments";
         }
 
         MedicalRecordRequest request = new MedicalRecordRequest();
@@ -143,7 +144,27 @@ public class DoctorController {
             return "redirect:/doctor/appointments";
         } catch (RuntimeException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
+
+            if (request.getAppointmentId() == null) {
+                return "redirect:/doctor/appointments";
+            }
+
             return "redirect:/doctor/examine/" + request.getAppointmentId();
         }
+    }
+
+    private User getLoginUser(HttpSession session) {
+        User loginUser = (User) session.getAttribute("loginUser");
+
+        if (loginUser == null) {
+            throw new RuntimeException("Bạn cần đăng nhập");
+        }
+
+        return loginUser;
+    }
+
+    private Doctor getDoctorByLoginUser(User user) {
+        return doctorRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy thông tin bác sĩ"));
     }
 }

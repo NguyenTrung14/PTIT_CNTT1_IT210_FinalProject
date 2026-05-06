@@ -30,24 +30,30 @@ public class AuthController {
             HttpSession session,
             RedirectAttributes redirectAttributes
     ) {
-        User user = authService.login(email, password);
+        try {
+            User user = authService.login(email, password);
 
-        if (user == null) {
-            redirectAttributes.addFlashAttribute("error", "Email hoặc mật khẩu không đúng");
+            if (user == null) {
+                redirectAttributes.addFlashAttribute("error", "Email hoặc mật khẩu không đúng");
+                return "redirect:/auth/login";
+            }
+
+            session.setAttribute("loginUser", user);
+
+            if (user.getRole() == Role.ADMIN) {
+                return "redirect:/admin/dashboard";
+            }
+
+            if (user.getRole() == Role.DOCTOR) {
+                return "redirect:/doctor/dashboard";
+            }
+
+            return "redirect:/patient/dashboard";
+
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/auth/login";
         }
-
-        session.setAttribute("loginUser", user);
-
-        if (user.getRole() == Role.ADMIN) {
-            return "redirect:/admin/dashboard";
-        }
-
-        if (user.getRole() == Role.DOCTOR) {
-            return "redirect:/doctor/dashboard";
-        }
-
-        return "redirect:/patient/dashboard";
     }
 
     @GetMapping("/register")
@@ -58,13 +64,14 @@ public class AuthController {
 
     @PostMapping("/register")
     public String register(
-            @ModelAttribute RegisterRequest request,
+            @ModelAttribute("registerRequest") RegisterRequest request,
             RedirectAttributes redirectAttributes
     ) {
         try {
             authService.register(request);
             redirectAttributes.addFlashAttribute("success", "Đăng ký thành công, vui lòng đăng nhập");
             return "redirect:/auth/login";
+
         } catch (RuntimeException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/auth/register";

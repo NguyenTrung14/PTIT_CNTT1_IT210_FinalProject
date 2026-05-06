@@ -12,6 +12,12 @@ public interface PrescriptionRepository extends JpaRepository<Prescription, Long
 
     Optional<Prescription> findByMedicalRecordId(Long medicalRecordId);
 
+    List<Prescription> findByStatusOrderByCreatedAtAsc(PrescriptionStatus status);
+
+    /*
+     * Dùng cho màn hình cấp phát thuốc:
+     * load đủ bệnh án, bệnh nhân, bác sĩ, thuốc để tránh LazyInitializationException.
+     */
     @Query("""
             select distinct p
             from Prescription p
@@ -25,4 +31,20 @@ public interface PrescriptionRepository extends JpaRepository<Prescription, Long
             order by p.createdAt asc
             """)
     List<Prescription> findFullByStatusOrderByCreatedAtAsc(PrescriptionStatus status);
+
+    /*
+     * Dùng cho trang chi tiết đơn thuốc.
+     */
+    @Query("""
+            select distinct p
+            from Prescription p
+            left join fetch p.medicalRecord mr
+            left join fetch mr.patient
+            left join fetch mr.doctor d
+            left join fetch d.user
+            left join fetch p.details pd
+            left join fetch pd.medicine
+            where p.id = :id
+            """)
+    Optional<Prescription> findFullById(Long id);
 }

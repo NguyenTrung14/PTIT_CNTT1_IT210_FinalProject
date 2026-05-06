@@ -24,8 +24,11 @@ public class AdminController {
     private final PrescriptionService prescriptionService;
 
     @GetMapping("/admin/dashboard")
-    public String dashboard(Model model, HttpSession session) {
-        User loginUser = (User) session.getAttribute("loginUser");
+    public String dashboard(
+            Model model,
+            HttpSession session
+    ) {
+        User loginUser = getLoginUser(session);
 
         model.addAttribute("loginUser", loginUser);
         model.addAttribute("users", userService.findAll());
@@ -36,9 +39,11 @@ public class AdminController {
     }
 
     @GetMapping("/admin/profile")
-    public String profileForm(Model model, HttpSession session) {
-        User loginUser = (User) session.getAttribute("loginUser");
-
+    public String profileForm(
+            Model model,
+            HttpSession session
+    ) {
+        User loginUser = getLoginUser(session);
         User user = userService.findById(loginUser.getId());
         UserProfile userProfile = userService.findProfileByUserId(user.getId());
 
@@ -46,8 +51,11 @@ public class AdminController {
         profile.setUserId(user.getId());
         profile.setFullName(user.getFullName());
         profile.setPhone(user.getPhone());
-        profile.setGender(userProfile.getGender());
-        profile.setAddress(userProfile.getAddress());
+
+        if (userProfile != null) {
+            profile.setGender(userProfile.getGender());
+            profile.setAddress(userProfile.getAddress());
+        }
 
         model.addAttribute("profile", profile);
 
@@ -61,9 +69,9 @@ public class AdminController {
             RedirectAttributes redirectAttributes
     ) {
         try {
-            User loginUser = (User) session.getAttribute("loginUser");
-            profile.setUserId(loginUser.getId());
+            User loginUser = getLoginUser(session);
 
+            profile.setUserId(loginUser.getId());
             userService.updateProfile(profile);
 
             User updatedUser = userService.findById(loginUser.getId());
@@ -75,5 +83,15 @@ public class AdminController {
         }
 
         return "redirect:/admin/profile";
+    }
+
+    private User getLoginUser(HttpSession session) {
+        User loginUser = (User) session.getAttribute("loginUser");
+
+        if (loginUser == null) {
+            throw new RuntimeException("Bạn cần đăng nhập");
+        }
+
+        return loginUser;
     }
 }

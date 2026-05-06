@@ -2,7 +2,11 @@ package com.example.javaweb_congthongtinbenhvien.service.impl;
 
 import com.example.javaweb_congthongtinbenhvien.dto.MedicalRecordRequest;
 import com.example.javaweb_congthongtinbenhvien.dto.PrescriptionDetailRequest;
-import com.example.javaweb_congthongtinbenhvien.entity.*;
+import com.example.javaweb_congthongtinbenhvien.entity.Appointment;
+import com.example.javaweb_congthongtinbenhvien.entity.MedicalRecord;
+import com.example.javaweb_congthongtinbenhvien.entity.Medicine;
+import com.example.javaweb_congthongtinbenhvien.entity.Prescription;
+import com.example.javaweb_congthongtinbenhvien.entity.PrescriptionDetail;
 import com.example.javaweb_congthongtinbenhvien.entity.enums.AppointmentStatus;
 import com.example.javaweb_congthongtinbenhvien.entity.enums.PrescriptionStatus;
 import com.example.javaweb_congthongtinbenhvien.repository.AppointmentRepository;
@@ -45,7 +49,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
 
         /*
          * Theo SRS CORE-06:
-         * Bác sĩ chỉ được khám ca đang ở trạng thái "Chờ khám".
+         * Bác sĩ chỉ tiếp nhận ca khám đang ở trạng thái "Chờ khám".
          */
         if (appointment.getStatus() != AppointmentStatus.WAITING) {
             throw new RuntimeException("Chỉ được khám lịch đang ở trạng thái chờ khám");
@@ -84,7 +88,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
 
         for (PrescriptionDetailRequest detailRequest : request.getPrescriptionDetails()) {
             if (detailRequest.getMedicineId() == null) {
-                continue;
+                throw new RuntimeException("Thuốc không được để trống");
             }
 
             if (detailRequest.getQuantity() == null || detailRequest.getQuantity() <= 0) {
@@ -102,10 +106,6 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
             detail.setUsageInstruction(detailRequest.getUsageInstruction());
 
             prescription.getDetails().add(detail);
-        }
-
-        if (prescription.getDetails().isEmpty()) {
-            throw new RuntimeException("Đơn thuốc phải có ít nhất 1 loại thuốc");
         }
 
         prescriptionRepository.save(prescription);

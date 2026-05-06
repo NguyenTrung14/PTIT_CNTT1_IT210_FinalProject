@@ -61,7 +61,8 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         /*
          * Theo SRS:
-         * Sau khi bệnh nhân đặt lịch, bác sĩ sẽ tiếp nhận lịch ở trạng thái "Chờ khám".
+         * Bệnh nhân đặt lịch xong thì lịch ở trạng thái chờ khám.
+         * Bác sĩ sẽ nhìn thấy lịch này ở màn hình /doctor/appointments.
          */
         appointment.setStatus(AppointmentStatus.WAITING);
 

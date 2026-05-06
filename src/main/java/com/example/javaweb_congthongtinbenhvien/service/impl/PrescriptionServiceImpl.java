@@ -33,7 +33,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
 
     @Override
     public Prescription findById(Long id) {
-        return prescriptionRepository.findById(id)
+        return prescriptionRepository.findFullById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn thuốc"));
     }
 
@@ -53,6 +53,10 @@ public class PrescriptionServiceImpl implements PrescriptionService {
         User dispensedBy = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy người cấp phát"));
 
+        /*
+         * Bước 1: kiểm tra toàn bộ tồn kho trước.
+         * Nếu 1 thuốc không đủ, chặn toàn bộ quá trình.
+         */
         for (PrescriptionDetail detail : prescription.getDetails()) {
             Medicine medicine = detail.getMedicine();
 
@@ -69,6 +73,9 @@ public class PrescriptionServiceImpl implements PrescriptionService {
             }
         }
 
+        /*
+         * Bước 2: sau khi tất cả thuốc đều đủ, mới trừ kho.
+         */
         for (PrescriptionDetail detail : prescription.getDetails()) {
             Medicine medicine = detail.getMedicine();
             medicine.setStockQuantity(medicine.getStockQuantity() - detail.getQuantity());
