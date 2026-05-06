@@ -20,14 +20,14 @@ public class LoginInterceptor implements HandlerInterceptor {
         HttpSession session = request.getSession(false);
 
         if (session == null) {
-            response.sendRedirect("/auth/login");
+            response.sendRedirect(request.getContextPath() + "/error/403?loginRequired=true");
             return false;
         }
 
         User loginUser = (User) session.getAttribute("loginUser");
 
         if (loginUser == null) {
-            response.sendRedirect("/auth/login");
+            response.sendRedirect(request.getContextPath() + "/error/403?loginRequired=true");
             return false;
         }
 

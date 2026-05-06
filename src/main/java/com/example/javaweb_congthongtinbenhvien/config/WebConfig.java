@@ -19,8 +19,11 @@ public class WebConfig implements WebMvcConfigurer {
 
         registry.addInterceptor(loginInterceptor)
                 .addPathPatterns(
+                        "/admin",
                         "/admin/**",
+                        "/doctor",
                         "/doctor/**",
+                        "/patient",
                         "/patient/**"
                 )
                 .excludePathPatterns(
@@ -33,8 +36,11 @@ public class WebConfig implements WebMvcConfigurer {
 
         registry.addInterceptor(roleInterceptor)
                 .addPathPatterns(
+                        "/admin",
                         "/admin/**",
+                        "/doctor",
                         "/doctor/**",
+                        "/patient",
                         "/patient/**"
                 )
                 .excludePathPatterns(

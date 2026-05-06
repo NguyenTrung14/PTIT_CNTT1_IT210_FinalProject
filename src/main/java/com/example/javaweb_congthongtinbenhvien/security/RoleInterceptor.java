@@ -21,32 +21,32 @@ public class RoleInterceptor implements HandlerInterceptor {
         HttpSession session = request.getSession(false);
 
         if (session == null) {
-            response.sendRedirect("/auth/login");
+            response.sendRedirect(request.getContextPath() + "/error/403?loginRequired=true");
             return false;
         }
 
         User loginUser = (User) session.getAttribute("loginUser");
 
         if (loginUser == null) {
-            response.sendRedirect("/auth/login");
+            response.sendRedirect(request.getContextPath() + "/error/403?loginRequired=true");
             return false;
         }
 
-        String uri = request.getRequestURI();
+        String uri = request.getServletPath();
         Role role = loginUser.getRole();
 
         if (uri.startsWith("/admin") && role != Role.ADMIN) {
-            response.sendRedirect("/error/403");
+            response.sendRedirect(request.getContextPath() + "/error/403");
             return false;
         }
 
         if (uri.startsWith("/doctor") && role != Role.DOCTOR) {
-            response.sendRedirect("/error/403");
+            response.sendRedirect(request.getContextPath() + "/error/403");
             return false;
         }
 
         if (uri.startsWith("/patient") && role != Role.PATIENT) {
-            response.sendRedirect("/error/403");
+            response.sendRedirect(request.getContextPath() + "/error/403");
             return false;
         }
 

@@ -1,8 +1,8 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Đăng nhập</title>
+    <title>Dang nhap</title>
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -18,6 +18,7 @@
             align-items: center;
             justify-content: center;
             font-family: Arial, sans-serif;
+            padding: 24px;
         }
 
         .login-card {
@@ -74,7 +75,14 @@
         .auth-link:hover {
             text-decoration: underline;
         }
+
+        .invalid-feedback {
+            display: block;
+            color: #dc3545;
+            font-size: 0.875rem;
+        }
     </style>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 
 <body>
@@ -83,21 +91,21 @@
 
     <div class="login-header">
         <i class="fa-solid fa-hospital-user"></i>
-        <h3>Đăng nhập hệ thống</h3>
-        <p class="mb-0">Cổng thông tin bệnh viện</p>
+        <h3>Dang nhap he thong</h3>
+        <p class="mb-0">Cong thong tin benh vien</p>
     </div>
 
     <div class="login-body">
 
         <div th:if="${error}" class="alert alert-danger" th:text="${error}">
-            Sai email hoặc mật khẩu
+            Sai email hoac mat khau
         </div>
 
         <div th:if="${success}" class="alert alert-success" th:text="${success}">
-            Đăng ký thành công
+            Dang ky thanh cong
         </div>
 
-        <form th:action="@{/auth/login}" method="post">
+        <form th:action="@{/auth/login}" method="post" novalidate>
 
             <div class="mb-3">
                 <label class="form-label">Email</label>
@@ -110,13 +118,19 @@
                     <input type="email"
                            name="email"
                            class="form-control"
-                           placeholder="Nhập email"
-                           required>
+                           th:classappend="${fieldErrors != null and fieldErrors.containsKey('email')} ? ' is-invalid'"
+                           th:value="${email}"
+                           placeholder="Nhap email">
+                </div>
+                <div class="invalid-feedback"
+                     th:if="${fieldErrors != null and fieldErrors.containsKey('email')}"
+                     th:text="${fieldErrors['email']}">
+                    Email khong hop le
                 </div>
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Mật khẩu</label>
+                <label class="form-label">Mat khau</label>
 
                 <div class="input-group">
                     <span class="input-group-text">
@@ -126,20 +140,25 @@
                     <input type="password"
                            name="password"
                            class="form-control"
-                           placeholder="Nhập mật khẩu"
-                           required>
+                           th:classappend="${fieldErrors != null and fieldErrors.containsKey('password')} ? ' is-invalid'"
+                           placeholder="Nhap mat khau">
+                </div>
+                <div class="invalid-feedback"
+                     th:if="${fieldErrors != null and fieldErrors.containsKey('password')}"
+                     th:text="${fieldErrors['password']}">
+                    Mat khau khong hop le
                 </div>
             </div>
 
             <button type="submit" class="btn btn-primary w-100 btn-login">
                 <i class="fa-solid fa-right-to-bracket me-1"></i>
-                Đăng nhập
+                Dang nhap
             </button>
         </form>
 
         <div class="text-center mt-3">
-            <span>Chưa có tài khoản?</span>
-            <a th:href="@{/auth/register}" class="auth-link">Đăng ký ngay</a>
+            <span>Chua co tai khoan?</span>
+            <a th:href="@{/auth/register}" class="auth-link">Dang ky ngay</a>
         </div>
 
     </div>

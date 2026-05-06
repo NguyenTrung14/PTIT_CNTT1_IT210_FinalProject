@@ -8,8 +8,15 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -18,6 +25,9 @@ public class AuthController {
 
     private final AuthService authService;
 
+    private static final String EMAIL_REGEX = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
+    private static final String PHONE_REGEX = "^(0|\\+84)[0-9]{9}$";
+
     @GetMapping("/login")
     public String loginForm() {
         return "auth/login";
@@ -25,17 +35,26 @@ public class AuthController {
 
     @PostMapping("/login")
     public String login(
-            @RequestParam String email,
-            @RequestParam String password,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String password,
             HttpSession session,
-            RedirectAttributes redirectAttributes
+            Model model
     ) {
         try {
+            Map<String, String> fieldErrors = validateLogin(email, password);
+
+            if (!fieldErrors.isEmpty()) {
+                model.addAttribute("fieldErrors", fieldErrors);
+                model.addAttribute("email", email);
+                return "auth/login";
+            }
+
             User user = authService.login(email, password);
 
             if (user == null) {
-                redirectAttributes.addFlashAttribute("error", "Email hoặc mật khẩu không đúng");
-                return "redirect:/auth/login";
+                model.addAttribute("error", "Email hoac mat khau khong dung");
+                model.addAttribute("email", email);
+                return "auth/login";
             }
 
             session.setAttribute("loginUser", user);
@@ -51,8 +70,9 @@ public class AuthController {
             return "redirect:/patient/dashboard";
 
         } catch (RuntimeException e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
-            return "redirect:/auth/login";
+            model.addAttribute("error", e.getMessage());
+            model.addAttribute("email", email);
+            return "auth/login";
         }
     }
 
@@ -65,16 +85,26 @@ public class AuthController {
     @PostMapping("/register")
     public String register(
             @ModelAttribute("registerRequest") RegisterRequest request,
+            Model model,
             RedirectAttributes redirectAttributes
     ) {
         try {
+            Map<String, String> fieldErrors = validateRegister(request);
+
+            if (!fieldErrors.isEmpty()) {
+                model.addAttribute("fieldErrors", fieldErrors);
+                model.addAttribute("registerRequest", request);
+                return "auth/register";
+            }
+
             authService.register(request);
-            redirectAttributes.addFlashAttribute("success", "Đăng ký thành công, vui lòng đăng nhập");
+            redirectAttributes.addFlashAttribute("success", "Dang ky thanh cong, vui long dang nhap");
             return "redirect:/auth/login";
 
         } catch (RuntimeException e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
-            return "redirect:/auth/register";
+            model.addAttribute("error", e.getMessage());
+            model.addAttribute("registerRequest", request);
+            return "auth/register";
         }
     }
 
@@ -82,5 +112,53 @@ public class AuthController {
     public String logout(HttpSession session) {
         session.invalidate();
         return "redirect:/auth/login";
+    }
+
+    private Map<String, String> validateLogin(String email, String password) {
+        Map<String, String> errors = new HashMap<>();
+
+        if (email == null || email.isBlank()) {
+            errors.put("email", "Email khong duoc de trong");
+        } else if (!email.trim().matches(EMAIL_REGEX)) {
+            errors.put("email", "Email khong dung dinh dang");
+        }
+
+        if (password == null || password.isBlank()) {
+            errors.put("password", "Mat khau khong duoc de trong");
+        }
+
+        return errors;
+    }
+
+    private Map<String, String> validateRegister(RegisterRequest request) {
+        Map<String, String> errors = new HashMap<>();
+
+        if (request.getFullName() == null || request.getFullName().isBlank()) {
+            errors.put("fullName", "Ho ten khong duoc de trong");
+        }
+
+        if (request.getEmail() == null || request.getEmail().isBlank()) {
+            errors.put("email", "Email khong duoc de trong");
+        } else if (!request.getEmail().trim().matches(EMAIL_REGEX)) {
+            errors.put("email", "Email khong dung dinh dang");
+        }
+
+        if (request.getPassword() == null || request.getPassword().isBlank()) {
+            errors.put("password", "Mat khau khong duoc de trong");
+        }
+
+        if (request.getConfirmPassword() == null || request.getConfirmPassword().isBlank()) {
+            errors.put("confirmPassword", "Xac nhan mat khau khong duoc de trong");
+        } else if (request.getPassword() != null && !request.getPassword().equals(request.getConfirmPassword())) {
+            errors.put("confirmPassword", "Mat khau xac nhan khong khop");
+        }
+
+        if (request.getPhone() == null || request.getPhone().isBlank()) {
+            errors.put("phone", "So dien thoai khong duoc de trong");
+        } else if (!request.getPhone().trim().matches(PHONE_REGEX)) {
+            errors.put("phone", "So dien thoai khong dung dinh dang");
+        }
+
+        return errors;
     }
 }

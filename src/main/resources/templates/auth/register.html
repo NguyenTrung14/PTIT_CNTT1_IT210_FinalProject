@@ -1,8 +1,8 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Đăng ký tài khoản</title>
+    <title>Dang ky tai khoan</title>
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -23,7 +23,7 @@
 
         .register-card {
             width: 100%;
-            max-width: 560px;
+            max-width: 520px;
             background: #ffffff;
             border-radius: 18px;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
@@ -51,8 +51,7 @@
             padding: 28px;
         }
 
-        .form-control,
-        .form-select {
+        .form-control {
             border-radius: 10px;
             padding: 11px 12px;
         }
@@ -71,7 +70,14 @@
         .auth-link:hover {
             text-decoration: underline;
         }
+
+        .invalid-feedback {
+            display: block;
+            color: #dc3545;
+            font-size: 0.875rem;
+        }
     </style>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 
 <body>
@@ -80,86 +86,103 @@
 
     <div class="register-header">
         <i class="fa-solid fa-user-plus"></i>
-        <h3>Đăng ký tài khoản</h3>
-        <p class="mb-0">Tạo tài khoản bệnh nhân mới</p>
+        <h3>Dang ky tai khoan</h3>
+        <p class="mb-0">Tao tai khoan benh nhan moi</p>
     </div>
 
     <div class="register-body">
 
         <div th:if="${error}" class="alert alert-danger" th:text="${error}">
-            Có lỗi xảy ra
+            Co loi xay ra
         </div>
 
         <div th:if="${success}" class="alert alert-success" th:text="${success}">
-            Đăng ký thành công
+            Dang ky thanh cong
         </div>
 
-        <form th:action="@{/auth/register}" th:object="${registerRequest}" method="post">
+        <form th:action="@{/auth/register}" th:object="${registerRequest}" method="post" novalidate>
 
             <div class="mb-3">
-                <label class="form-label">Họ tên</label>
+                <label class="form-label">Ho ten</label>
                 <input type="text"
                        class="form-control"
+                       th:classappend="${fieldErrors != null and fieldErrors.containsKey('fullName')} ? ' is-invalid'"
                        th:field="*{fullName}"
-                       placeholder="Nhập họ tên"
-                       required>
+                       placeholder="Nhap ho ten">
+                <div class="invalid-feedback"
+                     th:if="${fieldErrors != null and fieldErrors.containsKey('fullName')}"
+                     th:text="${fieldErrors['fullName']}">
+                    Ho ten khong hop le
+                </div>
             </div>
 
             <div class="mb-3">
                 <label class="form-label">Email</label>
                 <input type="email"
                        class="form-control"
+                       th:classappend="${fieldErrors != null and fieldErrors.containsKey('email')} ? ' is-invalid'"
                        th:field="*{email}"
-                       placeholder="Nhập email"
-                       required>
+                       placeholder="Nhap email">
+                <div class="invalid-feedback"
+                     th:if="${fieldErrors != null and fieldErrors.containsKey('email')}"
+                     th:text="${fieldErrors['email']}">
+                    Email khong hop le
+                </div>
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Mật khẩu</label>
+                <label class="form-label">Mat khau</label>
                 <input type="password"
                        class="form-control"
+                       th:classappend="${fieldErrors != null and fieldErrors.containsKey('password')} ? ' is-invalid'"
                        th:field="*{password}"
-                       placeholder="Nhập mật khẩu"
-                       required>
+                       placeholder="Nhap mat khau">
+                <div class="invalid-feedback"
+                     th:if="${fieldErrors != null and fieldErrors.containsKey('password')}"
+                     th:text="${fieldErrors['password']}">
+                    Mat khau khong hop le
+                </div>
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Số điện thoại</label>
+                <label class="form-label">Xac nhan mat khau</label>
+                <input type="password"
+                       class="form-control"
+                       th:classappend="${fieldErrors != null and fieldErrors.containsKey('confirmPassword')} ? ' is-invalid'"
+                       th:field="*{confirmPassword}"
+                       placeholder="Nhap lai mat khau">
+                <div class="invalid-feedback"
+                     th:if="${fieldErrors != null and fieldErrors.containsKey('confirmPassword')}"
+                     th:text="${fieldErrors['confirmPassword']}">
+                    Xac nhan mat khau khong hop le
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">So dien thoai</label>
                 <input type="text"
                        class="form-control"
+                       th:classappend="${fieldErrors != null and fieldErrors.containsKey('phone')} ? ' is-invalid'"
                        th:field="*{phone}"
-                       placeholder="Nhập số điện thoại">
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Giới tính</label>
-                <select class="form-select" th:field="*{gender}">
-                    <option value="">-- Chọn giới tính --</option>
-                    <option value="MALE">Nam</option>
-                    <option value="FEMALE">Nữ</option>
-                    <option value="OTHER">Khác</option>
-                </select>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Địa chỉ</label>
-                <textarea class="form-control"
-                          th:field="*{address}"
-                          rows="3"
-                          placeholder="Nhập địa chỉ"></textarea>
+                       placeholder="Nhap so dien thoai">
+                <div class="invalid-feedback"
+                     th:if="${fieldErrors != null and fieldErrors.containsKey('phone')}"
+                     th:text="${fieldErrors['phone']}">
+                    So dien thoai khong hop le
+                </div>
             </div>
 
             <input type="hidden" th:field="*{role}" value="PATIENT">
 
             <button type="submit" class="btn btn-success w-100 btn-register">
                 <i class="fa-solid fa-user-check me-1"></i>
-                Đăng ký
+                Dang ky
             </button>
         </form>
 
         <div class="text-center mt-3">
-            <span>Đã có tài khoản?</span>
-            <a th:href="@{/auth/login}" class="auth-link">Đăng nhập</a>
+            <span>Da co tai khoan?</span>
+            <a th:href="@{/auth/login}" class="auth-link">Dang nhap</a>
         </div>
 
     </div>

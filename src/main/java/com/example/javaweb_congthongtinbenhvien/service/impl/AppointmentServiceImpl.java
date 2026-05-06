@@ -3,16 +3,21 @@ package com.example.javaweb_congthongtinbenhvien.service.impl;
 import com.example.javaweb_congthongtinbenhvien.dto.AppointmentRequest;
 import com.example.javaweb_congthongtinbenhvien.entity.Appointment;
 import com.example.javaweb_congthongtinbenhvien.entity.Doctor;
+import com.example.javaweb_congthongtinbenhvien.entity.Payment;
 import com.example.javaweb_congthongtinbenhvien.entity.User;
 import com.example.javaweb_congthongtinbenhvien.entity.enums.AppointmentStatus;
+import com.example.javaweb_congthongtinbenhvien.entity.enums.PaymentMethod;
+import com.example.javaweb_congthongtinbenhvien.entity.enums.PaymentStatus;
 import com.example.javaweb_congthongtinbenhvien.repository.AppointmentRepository;
 import com.example.javaweb_congthongtinbenhvien.repository.DoctorRepository;
+import com.example.javaweb_congthongtinbenhvien.repository.PaymentRepository;
 import com.example.javaweb_congthongtinbenhvien.repository.UserRepository;
 import com.example.javaweb_congthongtinbenhvien.service.AppointmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -23,6 +28,9 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final AppointmentRepository appointmentRepository;
     private final UserRepository userRepository;
     private final DoctorRepository doctorRepository;
+    private final PaymentRepository paymentRepository;
+
+    private static final BigDecimal APPOINTMENT_FEE = new BigDecimal("100000");
 
     @Override
     @Transactional
@@ -34,6 +42,14 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         Doctor doctor = doctorRepository.findById(request.getDoctorId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy bác sĩ"));
+
+        if (request.getSpecialtyId() == null) {
+            throw new RuntimeException("Chuyen khoa khong duoc de trong");
+        }
+
+        if (!doctor.getSpecialty().getId().equals(request.getSpecialtyId())) {
+            throw new RuntimeException("Bac si khong thuoc chuyen khoa da chon");
+        }
 
         boolean exists = appointmentRepository.existsOverlapAppointment(
                 request.getDoctorId(),
@@ -64,9 +80,20 @@ public class AppointmentServiceImpl implements AppointmentService {
          * Bệnh nhân đặt lịch xong thì lịch ở trạng thái chờ khám.
          * Bác sĩ sẽ nhìn thấy lịch này ở màn hình /doctor/appointments.
          */
-        appointment.setStatus(AppointmentStatus.WAITING);
+        appointment.setStatus(AppointmentStatus.PENDING);
 
-        return appointmentRepository.save(appointment);
+        Appointment savedAppointment = appointmentRepository.save(appointment);
+
+        Payment payment = new Payment();
+        payment.setPatient(patient);
+        payment.setAppointment(savedAppointment);
+        payment.setAmount(APPOINTMENT_FEE);
+        payment.setMethod(PaymentMethod.VNPAY);
+        payment.setStatus(PaymentStatus.PENDING);
+        payment.setDescription("Phi dat lich kham #" + savedAppointment.getId());
+        paymentRepository.save(payment);
+
+        return savedAppointment;
     }
 
     @Override
@@ -123,6 +150,14 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.setCancelReason(cancelReason);
 
         appointmentRepository.save(appointment);
+
+        paymentRepository.findByAppointmentId(appointmentId).ifPresent(payment -> {
+            if (payment.getStatus() == PaymentStatus.PENDING) {
+                payment.setStatus(PaymentStatus.CANCELLED);
+                payment.setFailureReason("Benh nhan huy lich");
+                paymentRepository.save(payment);
+            }
+        });
     }
 
     private void validateAppointmentTime(AppointmentRequest request) {

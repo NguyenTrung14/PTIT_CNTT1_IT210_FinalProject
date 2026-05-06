@@ -2,6 +2,7 @@ package com.example.javaweb_congthongtinbenhvien.controller;
 
 import com.example.javaweb_congthongtinbenhvien.dto.AppointmentRequest;
 import com.example.javaweb_congthongtinbenhvien.dto.ProfileRequest;
+import com.example.javaweb_congthongtinbenhvien.entity.Appointment;
 import com.example.javaweb_congthongtinbenhvien.entity.User;
 import com.example.javaweb_congthongtinbenhvien.entity.UserProfile;
 import com.example.javaweb_congthongtinbenhvien.entity.enums.CommonStatus;
@@ -109,10 +110,10 @@ public class PatientController {
             User loginUser = (User) session.getAttribute("loginUser");
             request.setPatientId(loginUser.getId());
 
-            appointmentService.bookAppointment(request);
+            Appointment appointment = appointmentService.bookAppointment(request);
 
-            redirectAttributes.addFlashAttribute("success", "Đặt lịch khám thành công");
-            return "redirect:/patient/appointments";
+            redirectAttributes.addFlashAttribute("success", "Dat lich thanh cong. Vui long thanh toan de xac nhan lich kham.");
+            return "redirect:/patient/payments/checkout/" + appointment.getId();
         } catch (RuntimeException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/patient/appointments/book";

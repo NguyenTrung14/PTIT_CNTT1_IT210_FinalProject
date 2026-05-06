@@ -1,24 +1,25 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Lịch khám của tôi</title>
+    <title>Lich kham cua toi</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 
 <body class="bg-light">
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="container">
-        <a class="navbar-brand fw-bold" th:href="@{/patient/dashboard}">Cổng bệnh nhân</a>
+        <a class="navbar-brand fw-bold" th:href="@{/patient/dashboard}">Cong benh nhan</a>
 
         <div class="d-flex gap-2">
             <a class="btn btn-outline-light btn-sm" th:href="@{/patient/dashboard}">Dashboard</a>
-            <a class="btn btn-outline-light btn-sm" th:href="@{/patient/appointments/book}">Đặt lịch</a>
-            <a class="btn btn-outline-light btn-sm" th:href="@{/patient/medical-history}">Bệnh án</a>
-            <a class="btn btn-light btn-sm" th:href="@{/logout}">Đăng xuất</a>
+            <a class="btn btn-outline-light btn-sm" th:href="@{/patient/appointments/book}">Dat lich</a>
+            <a class="btn btn-outline-light btn-sm" th:href="@{/patient/medical-history}">Benh an</a>
+            <a class="btn btn-light btn-sm" th:href="@{/logout}">Dang xuat</a>
         </div>
     </div>
 </nav>
@@ -27,12 +28,12 @@
 
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
-            <h3>Lịch khám của tôi</h3>
-            <p class="text-muted mb-0">Theo dõi trạng thái lịch khám và hủy lịch trước 24 giờ.</p>
+            <h3>Lich kham cua toi</h3>
+            <p class="text-muted mb-0">Theo doi trang thai lich kham, thanh toan va huy lich truoc 24 gio.</p>
         </div>
 
         <a th:href="@{/patient/appointments/book}" class="btn btn-primary">
-            Đặt lịch mới
+            Dat lich moi
         </a>
     </div>
 
@@ -46,71 +47,78 @@
                 <thead class="table-light">
                 <tr>
                     <th>ID</th>
-                    <th>Bác sĩ</th>
-                    <th>Chuyên khoa</th>
-                    <th>Ngày khám</th>
-                    <th>Giờ</th>
-                    <th>Lý do</th>
-                    <th>Trạng thái</th>
-                    <th>Thao tác</th>
+                    <th>Bac si</th>
+                    <th>Chuyen khoa</th>
+                    <th>Ngay kham</th>
+                    <th>Gio</th>
+                    <th>Ly do</th>
+                    <th>Trang thai</th>
+                    <th>Thanh toan</th>
+                    <th>Thao tac</th>
                 </tr>
                 </thead>
 
                 <tbody>
                 <tr th:if="${#lists.isEmpty(appointments)}">
-                    <td colspan="8" class="text-center text-muted">
-                        Bạn chưa có lịch khám nào.
+                    <td colspan="9" class="text-center text-muted">
+                        Ban chua co lich kham nao.
                     </td>
                 </tr>
 
                 <tr th:each="appointment : ${appointments}">
                     <td th:text="${appointment.id}">1</td>
-
-                    <td th:text="${appointment.doctor.user.fullName}">Bác sĩ</td>
-
-                    <td th:text="${appointment.doctor.specialty.name}">Chuyên khoa</td>
-
+                    <td th:text="${appointment.doctor.user.fullName}">Bac si</td>
+                    <td th:text="${appointment.doctor.specialty.name}">Chuyen khoa</td>
                     <td th:text="${#temporals.format(appointment.appointmentDate, 'dd/MM/yyyy')}">01/01/2026</td>
-
                     <td>
                         <span th:text="${appointment.startTime}">08:00</span>
                         -
                         <span th:text="${appointment.endTime}">08:30</span>
                     </td>
-
-                    <td th:text="${appointment.reason}">Lý do</td>
-
+                    <td th:text="${appointment.reason}">Ly do</td>
                     <td>
-                        <span class="badge bg-warning text-dark" th:if="${appointment.status.name() == 'WAITING'}">
-                            Chờ khám
-                        </span>
-
-                        <span class="badge bg-success" th:if="${appointment.status.name() == 'COMPLETED'}">
-                            Hoàn thành
-                        </span>
-
-                        <span class="badge bg-danger" th:if="${appointment.status.name() == 'CANCELLED'}">
-                            Đã hủy
-                        </span>
-
+                        <span class="badge bg-info text-dark" th:if="${appointment.status.name() == 'PENDING'}">Cho thanh toan</span>
+                        <span class="badge bg-warning text-dark" th:if="${appointment.status.name() == 'WAITING'}">Cho kham</span>
+                        <span class="badge bg-success" th:if="${appointment.status.name() == 'COMPLETED'}">Hoan thanh</span>
+                        <span class="badge bg-danger" th:if="${appointment.status.name() == 'CANCELLED'}">Da huy</span>
                         <span class="badge bg-secondary"
-                              th:if="${appointment.status.name() != 'WAITING'
+                              th:if="${appointment.status.name() != 'PENDING'
+                                      and appointment.status.name() != 'WAITING'
                                       and appointment.status.name() != 'COMPLETED'
                                       and appointment.status.name() != 'CANCELLED'}"
                               th:text="${appointment.status}">
                         </span>
                     </td>
-
                     <td>
-                        <a th:if="${appointment.status.name() == 'WAITING'}"
-                           th:href="@{/patient/appointments/cancel/{id}(id=${appointment.id}, reason='Bệnh nhân chủ động hủy lịch')}"
-                           class="btn btn-danger btn-sm"
-                           onclick="return confirm('Bạn chắc chắn muốn hủy lịch này?')">
-                            Hủy lịch
+                        <span class="badge bg-warning text-dark"
+                              th:if="${appointment.payment != null and appointment.payment.status.name() == 'PENDING'}">
+                            Cho thanh toan
+                        </span>
+                        <span class="badge bg-success"
+                              th:if="${appointment.payment != null and appointment.payment.status.name() == 'PAID'}">
+                            Da thanh toan
+                        </span>
+                        <span class="badge bg-secondary"
+                              th:if="${appointment.payment == null}">
+                            Khong co
+                        </span>
+                    </td>
+                    <td>
+                        <a th:if="${appointment.status.name() == 'PENDING'}"
+                           th:href="@{/patient/payments/checkout/{id}(id=${appointment.id})}"
+                           class="btn btn-success btn-sm">
+                            Thanh toan
                         </a>
 
-                        <span th:if="${appointment.status.name() != 'WAITING'}" class="text-muted">
-                            Không khả dụng
+                        <a th:if="${appointment.status.name() == 'PENDING' or appointment.status.name() == 'WAITING'}"
+                           th:href="@{/patient/appointments/cancel/{id}(id=${appointment.id}, reason='Benh nhan chu dong huy lich')}"
+                           class="btn btn-danger btn-sm"
+                           onclick="return confirm('Ban chac chan muon huy lich nay?')">
+                            Huy lich
+                        </a>
+
+                        <span th:if="${appointment.status.name() != 'PENDING' and appointment.status.name() != 'WAITING'}" class="text-muted">
+                            Khong kha dung
                         </span>
                     </td>
                 </tr>

@@ -3,8 +3,12 @@ package com.example.javaweb_congthongtinbenhvien.controller;
 import com.example.javaweb_congthongtinbenhvien.dto.ProfileRequest;
 import com.example.javaweb_congthongtinbenhvien.entity.User;
 import com.example.javaweb_congthongtinbenhvien.entity.UserProfile;
+import com.example.javaweb_congthongtinbenhvien.entity.enums.CommonStatus;
+import com.example.javaweb_congthongtinbenhvien.repository.SpecialtyRepository;
+import com.example.javaweb_congthongtinbenhvien.repository.TestTypeRepository;
 import com.example.javaweb_congthongtinbenhvien.service.MedicineService;
 import com.example.javaweb_congthongtinbenhvien.service.PrescriptionService;
+import com.example.javaweb_congthongtinbenhvien.service.ReportService;
 import com.example.javaweb_congthongtinbenhvien.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +26,9 @@ public class AdminController {
     private final UserService userService;
     private final MedicineService medicineService;
     private final PrescriptionService prescriptionService;
+    private final SpecialtyRepository specialtyRepository;
+    private final TestTypeRepository testTypeRepository;
+    private final ReportService reportService;
 
     @GetMapping("/admin/dashboard")
     public String dashboard(
@@ -34,8 +41,21 @@ public class AdminController {
         model.addAttribute("users", userService.findAll());
         model.addAttribute("medicines", medicineService.findAllActive());
         model.addAttribute("waitingPrescriptions", prescriptionService.findWaitingDispense());
+        model.addAttribute("specialties", specialtyRepository.findByStatus(CommonStatus.ACTIVE));
+        model.addAttribute("testTypes", testTypeRepository.findByStatus(CommonStatus.ACTIVE));
+        model.addAttribute("totalRevenue", reportService.totalPaidRevenue());
+        model.addAttribute("revenueByMonth", reportService.revenueByMonth());
+        model.addAttribute("topDoctors", reportService.topDoctors());
 
         return "admin/dashboard";
+    }
+
+    @GetMapping("/admin/reference-data")
+    public String referenceData(Model model) {
+        model.addAttribute("specialties", specialtyRepository.findByStatus(CommonStatus.ACTIVE));
+        model.addAttribute("testTypes", testTypeRepository.findByStatus(CommonStatus.ACTIVE));
+
+        return "admin/reference-data";
     }
 
     @GetMapping("/admin/profile")

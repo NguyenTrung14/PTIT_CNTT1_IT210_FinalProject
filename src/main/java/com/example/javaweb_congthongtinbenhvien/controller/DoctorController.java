@@ -136,9 +136,23 @@ public class DoctorController {
     @PostMapping("/examine")
     public String examine(
             @ModelAttribute("medicalRecord") MedicalRecordRequest request,
+            HttpSession session,
             RedirectAttributes redirectAttributes
     ) {
         try {
+            User loginUser = getLoginUser(session);
+            Doctor doctor = getDoctorByLoginUser(loginUser);
+
+            if (request.getAppointmentId() == null) {
+                throw new RuntimeException("Lich kham khong duoc de trong");
+            }
+
+            Appointment appointment = appointmentService.findById(request.getAppointmentId());
+
+            if (!appointment.getDoctor().getId().equals(doctor.getId())) {
+                throw new RuntimeException("Ban khong co quyen kham lich nay");
+            }
+
             medicalRecordService.createMedicalRecord(request);
             redirectAttributes.addFlashAttribute("success", "Lưu kết quả khám thành công");
             return "redirect:/doctor/appointments";

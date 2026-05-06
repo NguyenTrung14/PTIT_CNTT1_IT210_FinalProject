@@ -21,6 +21,12 @@ public class AuthServiceImpl implements AuthService {
     private final UserProfileRepository userProfileRepository;
     private final PasswordEncoder passwordEncoder;
 
+    private static final String EMAIL_REGEX =
+            "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
+
+    private static final String PHONE_REGEX =
+            "^(0|\\+84)[0-9]{9}$";
+
     @Override
     public User login(String email, String password) {
         if (email == null || email.isBlank()) {
@@ -54,6 +60,10 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public User register(RegisterRequest request) {
+        if (request == null) {
+            throw new RuntimeException("Dữ liệu đăng ký không hợp lệ");
+        }
+
         if (request.getEmail() == null || request.getEmail().isBlank()) {
             throw new RuntimeException("Email không được để trống");
         }
@@ -72,13 +82,25 @@ public class AuthServiceImpl implements AuthService {
 
         String email = request.getEmail().trim().toLowerCase();
 
+        if (!email.matches(EMAIL_REGEX)) {
+            throw new RuntimeException("Email không đúng định dạng");
+        }
+
+        if (request.getPhone() == null || request.getPhone().isBlank()) {
+            throw new RuntimeException("Số điện thoại không được để trống");
+        }
+
+        String phone = request.getPhone().trim();
+
+        if (!phone.matches(PHONE_REGEX)) {
+            throw new RuntimeException("Số điện thoại không đúng định dạng");
+        }
+
         if (userRepository.existsByEmail(email)) {
             throw new RuntimeException("Email đã tồn tại");
         }
 
-        if (request.getPhone() != null
-                && !request.getPhone().isBlank()
-                && userRepository.existsByPhone(request.getPhone().trim())) {
+        if (userRepository.existsByPhone(phone)) {
             throw new RuntimeException("Số điện thoại đã tồn tại");
         }
 
@@ -86,10 +108,8 @@ public class AuthServiceImpl implements AuthService {
         user.setEmail(email);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setFullName(request.getFullName());
-        user.setPhone(request.getPhone() == null ? null : request.getPhone().trim());
-
+        user.setPhone(phone);
         user.setRole(Role.PATIENT);
-
         user.setStatus(UserStatus.ACTIVE);
 
         User savedUser = userRepository.save(user);
