@@ -26,7 +26,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
 
     @Override
     public List<Prescription> findWaitingDispense() {
-        return prescriptionRepository.findByStatusOrderByCreatedAtAsc(
+        return prescriptionRepository.findFullByStatusOrderByCreatedAtAsc(
                 PrescriptionStatus.WAITING_DISPENSE
         );
     }
@@ -65,9 +65,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
             }
 
             if (medicine.getStockQuantity() == null || medicine.getStockQuantity() < detail.getQuantity()) {
-                throw new RuntimeException(
-                        "Thuốc " + medicine.getName() + " không đủ tồn kho"
-                );
+                throw new RuntimeException("Thuốc " + medicine.getName() + " không đủ tồn kho");
             }
         }
 

@@ -1,6 +1,5 @@
 package com.example.javaweb_congthongtinbenhvien.controller;
 
-import com.example.javaweb_congthongtinbenhvien.dto.MedicineRequest;
 import com.example.javaweb_congthongtinbenhvien.entity.Medicine;
 import com.example.javaweb_congthongtinbenhvien.service.MedicineService;
 import lombok.RequiredArgsConstructor;
@@ -21,24 +20,24 @@ public class MedicineController {
             @RequestParam(defaultValue = "") String keyword,
             Model model
     ) {
-        model.addAttribute("medicines", medicineService.search(keyword));
+        model.addAttribute("medicines", medicineService.findAll(keyword));
         model.addAttribute("keyword", keyword);
         return "admin/medicines/list";
     }
 
     @GetMapping("/add")
-    public String addForm(Model model) {
-        model.addAttribute("medicine", new MedicineRequest());
+    public String add(Model model) {
+        model.addAttribute("medicine", new Medicine());
         return "admin/medicines/form";
     }
 
     @PostMapping("/save")
     public String save(
-            @ModelAttribute("medicine") MedicineRequest request,
+            @ModelAttribute("medicine") Medicine medicine,
             RedirectAttributes redirectAttributes
     ) {
         try {
-            medicineService.save(request);
+            medicineService.save(medicine);
             redirectAttributes.addFlashAttribute("success", "Thêm thuốc thành công");
             return "redirect:/admin/medicines";
         } catch (RuntimeException e) {
@@ -48,33 +47,23 @@ public class MedicineController {
     }
 
     @GetMapping("/edit/{id}")
-    public String editForm(
+    public String edit(
             @PathVariable Long id,
             Model model
     ) {
-        Medicine medicine = medicineService.findById(id);
-
-        MedicineRequest request = new MedicineRequest();
-        request.setId(medicine.getId());
-        request.setName(medicine.getName());
-        request.setUnit(medicine.getUnit());
-        request.setPrice(medicine.getPrice());
-        request.setStockQuantity(medicine.getStockQuantity());
-        request.setDescription(medicine.getDescription());
-
-        model.addAttribute("medicine", request);
-
+        model.addAttribute("medicine", medicineService.findById(id));
         return "admin/medicines/form";
     }
 
     @PostMapping("/update/{id}")
     public String update(
             @PathVariable Long id,
-            @ModelAttribute("medicine") MedicineRequest request,
+            @ModelAttribute("medicine") Medicine medicine,
             RedirectAttributes redirectAttributes
     ) {
         try {
-            medicineService.update(id, request);
+            medicine.setId(id);
+            medicineService.save(medicine);
             redirectAttributes.addFlashAttribute("success", "Cập nhật thuốc thành công");
             return "redirect:/admin/medicines";
         } catch (RuntimeException e) {

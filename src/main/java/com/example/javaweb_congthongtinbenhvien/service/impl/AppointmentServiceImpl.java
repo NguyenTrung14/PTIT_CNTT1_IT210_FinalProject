@@ -40,7 +40,11 @@ public class AppointmentServiceImpl implements AppointmentService {
                 request.getAppointmentDate(),
                 request.getStartTime(),
                 request.getEndTime(),
-                List.of(AppointmentStatus.WAITING)
+                List.of(
+                        AppointmentStatus.PENDING,
+                        AppointmentStatus.CONFIRMED,
+                        AppointmentStatus.WAITING
+                )
         );
 
         if (exists) {
@@ -54,6 +58,11 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.setStartTime(request.getStartTime());
         appointment.setEndTime(request.getEndTime());
         appointment.setReason(request.getReason());
+
+        /*
+         * Theo SRS:
+         * Sau khi bệnh nhân đặt lịch, bác sĩ sẽ tiếp nhận lịch ở trạng thái "Chờ khám".
+         */
         appointment.setStatus(AppointmentStatus.WAITING);
 
         return appointmentRepository.save(appointment);

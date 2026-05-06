@@ -12,15 +12,7 @@ import java.time.LocalTime;
 @Getter
 @Setter
 @Entity
-@Table(
-        name = "appointments",
-        indexes = {
-                @Index(name = "idx_appointments_patient_id", columnList = "patient_id"),
-                @Index(name = "idx_appointments_doctor_id", columnList = "doctor_id"),
-                @Index(name = "idx_appointments_date", columnList = "appointment_date"),
-                @Index(name = "idx_appointments_status", columnList = "status")
-        }
-)
+@Table(name = "appointments")
 public class Appointment {
 
     @Id
@@ -37,57 +29,43 @@ public class Appointment {
     @JoinColumn(name = "doctor_id", nullable = false)
     private Doctor doctor;
 
+    // Ngày khám
     @Column(name = "appointment_date", nullable = false)
     private LocalDate appointmentDate;
 
+    // Giờ bắt đầu
     @Column(name = "start_time", nullable = false)
     private LocalTime startTime;
 
+    // Giờ kết thúc
     @Column(name = "end_time", nullable = false)
     private LocalTime endTime;
 
-    /*
-     * CORE-05: đặt lịch
-     * CORE-06: bác sĩ tiếp nhận lịch chờ khám
-     * CORE-09: hủy lịch và giải phóng slot
-     */
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 30)
-    private AppointmentStatus status = AppointmentStatus.PENDING;
+    @Column(nullable = false)
+    private AppointmentStatus status = AppointmentStatus.WAITING;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "text")
     private String reason;
 
-    @Column(name = "cancel_reason", columnDefinition = "TEXT")
+    @Column(name = "cancel_reason", columnDefinition = "text")
     private String cancelReason;
 
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
-
-    // Mỗi lịch khám hoàn thành có 1 bệnh án
-    @OneToOne(mappedBy = "appointment", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "appointment", cascade = CascadeType.ALL, orphanRemoval = true)
     private MedicalRecord medicalRecord;
 
-    @OneToOne(mappedBy = "appointment", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "appointment", cascade = CascadeType.ALL, orphanRemoval = true)
     private Payment payment;
 
     @PrePersist
     public void prePersist() {
-        LocalDateTime now = LocalDateTime.now();
-        createdAt = now;
-        updatedAt = now;
+        createdAt = LocalDateTime.now();
 
         if (status == null) {
-            status = AppointmentStatus.PENDING;
+            status = AppointmentStatus.WAITING;
         }
     }
-
-    @PreUpdate
-    public void preUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
-
 }

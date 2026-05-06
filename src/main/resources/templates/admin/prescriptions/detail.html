@@ -3,67 +3,193 @@
 <head>
     <meta charset="UTF-8">
     <title>Chi tiết đơn thuốc</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
-<div class="container mt-4">
-    <h2>Chi tiết đơn thuốc</h2>
 
-    <a th:href="@{/admin/prescriptions/waiting}" class="btn btn-secondary btn-sm mb-3">
-        Quay lại danh sách
-    </a>
+<body class="bg-light">
 
-    <div class="card p-3 mb-3">
-        <p><b>Mã đơn thuốc:</b> <span th:text="${prescription.id}"></span></p>
-        <p><b>Trạng thái:</b> <span th:text="${prescription.status}"></span></p>
-        <p><b>Bệnh nhân:</b> <span th:text="${prescription.medicalRecord.patient.fullName}"></span></p>
-        <p><b>Bác sĩ:</b> <span th:text="${prescription.medicalRecord.doctor.user.fullName}"></span></p>
-        <p><b>Chẩn đoán:</b> <span th:text="${prescription.medicalRecord.diagnosis}"></span></p>
-        <p><b>Ngày tạo:</b> <span th:text="${#temporals.format(prescription.createdAt, 'dd/MM/yyyy HH:mm')}"></span></p>
+<nav class="navbar navbar-expand-lg navbar-dark"
+     th:classappend="${basePath == '/doctor'} ? ' bg-success' : ' bg-dark'">
+    <div class="container">
+        <a class="navbar-brand fw-bold"
+           th:href="${basePath == '/doctor'} ? @{/doctor/dashboard} : @{/admin/dashboard}">
+            Chi tiết đơn thuốc
+        </a>
 
-        <p th:if="${prescription.dispensedAt != null}">
-            <b>Ngày cấp phát:</b>
-            <span th:text="${#temporals.format(prescription.dispensedAt, 'dd/MM/yyyy HH:mm')}"></span>
-        </p>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-light btn-sm"
+               th:href="@{${basePath + '/prescriptions/waiting'}}">
+                Quay lại
+            </a>
 
-        <p th:if="${prescription.dispensedBy != null}">
-            <b>Người cấp phát:</b>
-            <span th:text="${prescription.dispensedBy.fullName}"></span>
-        </p>
+            <a class="btn btn-light btn-sm" th:href="@{/logout}">
+                Đăng xuất
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container py-4">
+
+    <h3>Chi tiết đơn thuốc</h3>
+
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white">
+                    <strong>Thông tin bệnh án</strong>
+                </div>
+
+                <div class="card-body">
+                    <p>
+                        <strong>Bệnh nhân:</strong>
+                        <span th:text="${prescription.medicalRecord.patient.fullName}">Bệnh nhân</span>
+                    </p>
+
+                    <p>
+                        <strong>Bác sĩ:</strong>
+                        <span th:text="${prescription.medicalRecord.doctor.user.fullName}">Bác sĩ</span>
+                    </p>
+
+                    <p>
+                        <strong>Triệu chứng:</strong>
+                        <span th:text="${prescription.medicalRecord.symptoms}">Triệu chứng</span>
+                    </p>
+
+                    <p>
+                        <strong>Chẩn đoán:</strong>
+                        <span th:text="${prescription.medicalRecord.diagnosis}">Chẩn đoán</span>
+                    </p>
+
+                    <p>
+                        <strong>Phác đồ:</strong>
+                        <span th:text="${prescription.medicalRecord.treatmentPlan}">Phác đồ</span>
+                    </p>
+
+                    <p>
+                        <strong>Ghi chú:</strong>
+                        <span th:text="${prescription.medicalRecord.note}">Ghi chú</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white">
+                    <strong>Thông tin cấp phát</strong>
+                </div>
+
+                <div class="card-body">
+                    <p>
+                        <strong>Mã đơn:</strong>
+                        <span th:text="${prescription.id}">1</span>
+                    </p>
+
+                    <p>
+                        <strong>Ngày tạo:</strong>
+                        <span th:text="${#temporals.format(prescription.createdAt, 'dd/MM/yyyy HH:mm')}">
+                            01/01/2026
+                        </span>
+                    </p>
+
+                    <p>
+                        <strong>Trạng thái:</strong>
+
+                        <span class="badge bg-warning text-dark"
+                              th:if="${prescription.status.name() == 'WAITING_DISPENSE'}">
+                            Chờ cấp phát
+                        </span>
+
+                        <span class="badge bg-success"
+                              th:if="${prescription.status.name() == 'DISPENSED'}">
+                            Đã phát
+                        </span>
+                    </p>
+
+                    <p th:if="${prescription.dispensedAt != null}">
+                        <strong>Thời gian phát:</strong>
+                        <span th:text="${#temporals.format(prescription.dispensedAt, 'dd/MM/yyyy HH:mm')}"></span>
+                    </p>
+
+                    <p th:if="${prescription.dispensedBy != null}">
+                        <strong>Người phát:</strong>
+                        <span th:text="${prescription.dispensedBy.fullName}"></span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <h5>Danh sách thuốc</h5>
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white">
+            <strong>Danh sách thuốc</strong>
+        </div>
 
-    <table class="table table-bordered">
-        <thead>
-        <tr>
-            <th>Tên thuốc</th>
-            <th>Đơn vị</th>
-            <th>Tồn kho hiện tại</th>
-            <th>Số lượng kê</th>
-            <th>Liều dùng</th>
-            <th>Hướng dẫn sử dụng</th>
-        </tr>
-        </thead>
+        <div class="card-body">
+            <table class="table table-bordered table-hover align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th>Tên thuốc</th>
+                    <th>Số lượng kê</th>
+                    <th>Tồn kho hiện tại</th>
+                    <th>Liều dùng</th>
+                    <th>Hướng dẫn</th>
+                    <th>Kiểm tra tồn</th>
+                </tr>
+                </thead>
 
-        <tbody>
-        <tr th:each="detail : ${prescription.details}">
-            <td th:text="${detail.medicine.name}"></td>
-            <td th:text="${detail.medicine.unit}"></td>
-            <td th:text="${detail.medicine.stockQuantity}"></td>
-            <td th:text="${detail.quantity}"></td>
-            <td th:text="${detail.dosage}"></td>
-            <td th:text="${detail.usageInstruction}"></td>
-        </tr>
-        </tbody>
-    </table>
+                <tbody>
+                <tr th:if="${#lists.isEmpty(prescription.details)}">
+                    <td colspan="6" class="text-center text-muted">
+                        Đơn thuốc chưa có chi tiết.
+                    </td>
+                </tr>
 
-    <a th:if="${prescription.status.name() == 'WAITING_DISPENSE'}"
-       th:href="@{/admin/prescriptions/dispense/{id}(id=${prescription.id})}"
-       class="btn btn-success"
-       onclick="return confirm('Xác nhận cấp phát thuốc và trừ tồn kho?')">
-        Xác nhận phát thuốc
-    </a>
+                <tr th:each="detail : ${prescription.details}">
+                    <td th:text="${detail.medicine.name}">Paracetamol</td>
+
+                    <td th:text="${detail.quantity}">1</td>
+
+                    <td th:text="${detail.medicine.stockQuantity}">100</td>
+
+                    <td th:text="${detail.dosage}">2 viên/ngày</td>
+
+                    <td th:text="${detail.usageInstruction}">Sau ăn</td>
+
+                    <td>
+                        <span class="badge bg-success"
+                              th:if="${detail.medicine.stockQuantity >= detail.quantity}">
+                            Đủ tồn
+                        </span>
+
+                        <span class="badge bg-danger"
+                              th:if="${detail.medicine.stockQuantity < detail.quantity}">
+                            Không đủ tồn
+                        </span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+            <a th:if="${prescription.status.name() == 'WAITING_DISPENSE'}"
+               th:href="@{${basePath + '/prescriptions/dispense/' + prescription.id}}"
+               class="btn btn-success"
+               onclick="return confirm('Xác nhận cấp phát thuốc và trừ tồn kho?')">
+                Xác nhận phát thuốc
+            </a>
+
+            <a th:href="@{${basePath + '/prescriptions/waiting'}}" class="btn btn-secondary">
+                Quay lại
+            </a>
+        </div>
+    </div>
+
 </div>
+
 </body>
 </html>
