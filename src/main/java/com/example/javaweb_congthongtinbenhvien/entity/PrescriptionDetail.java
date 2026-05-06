@@ -14,7 +14,6 @@ public class PrescriptionDetail {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
     @ManyToOne
     @JoinColumn(name = "prescription_id", nullable = false)
     private Prescription prescription;
@@ -26,16 +25,9 @@ public class PrescriptionDetail {
     @Column(nullable = false)
     private Integer quantity;
 
-    @Column(length = 255)
+    @Column(length = 100)
     private String dosage;
 
-    @Column(name = "usage_instruction", length = 255)
+    @Column(name = "usage_instruction", columnDefinition = "text")
     private String usageInstruction;
-
-    @PrePersist
-    public void prePersist() {
-        if (quantity == null) {
-            quantity = 1;
-        }
-    }
 }

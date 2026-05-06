@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -18,13 +20,13 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 100)
+    @Column(nullable = false, unique = true, length = 50)
     private String email;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 255)
     private String password;
 
-    @Column(name = "full_name", nullable = false, length = 100)
+    @Column(name = "full_name", length = 100)
     private String fullName;
 
     @Column(unique = true, length = 20)
@@ -41,27 +43,24 @@ public class User {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private UserProfile profile;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Doctor doctor;
+
+    @OneToMany(mappedBy = "patient")
+    private List<Appointment> appointments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "dispensedBy")
+    private List<Prescription> dispensedPrescriptions = new ArrayList<>();
 
     @PrePersist
     public void prePersist() {
         createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
 
         if (status == null) {
             status = UserStatus.ACTIVE;
         }
-    }
-
-    @PreUpdate
-    public void preUpdate() {
-        updatedAt = LocalDateTime.now();
     }
 }

@@ -1,9 +1,11 @@
 package com.example.javaweb_congthongtinbenhvien.entity;
 
-import com.example.javaweb_congthongtinbenhvien.entity.enums.CommonStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -23,30 +25,15 @@ public class Doctor {
     @JoinColumn(name = "specialty_id", nullable = false)
     private Specialty specialty;
 
-    @Column(length = 100)
-    private String degree;
+    @Column(name = "license_number", nullable = false, unique = true, length = 50)
+    private String licenseNumber;
 
     @Column(name = "experience_years")
-    private Integer experienceYears = 0;
+    private Integer experienceYears;
 
-    @Column(name = "room_number", length = 20)
-    private String roomNumber;
+    @OneToMany(mappedBy = "doctor")
+    private List<Appointment> appointments = new ArrayList<>();
 
-    @Column(columnDefinition = "text")
-    private String description;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private CommonStatus status = CommonStatus.ACTIVE;
-
-    @PrePersist
-    public void prePersist() {
-        if (experienceYears == null) {
-            experienceYears = 0;
-        }
-
-        if (status == null) {
-            status = CommonStatus.ACTIVE;
-        }
-    }
+    @OneToMany(mappedBy = "doctor")
+    private List<MedicalRecord> medicalRecords = new ArrayList<>();
 }

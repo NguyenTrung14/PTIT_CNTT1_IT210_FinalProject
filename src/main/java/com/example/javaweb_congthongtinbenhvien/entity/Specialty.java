@@ -5,6 +5,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 @Setter
 @Entity
@@ -24,6 +27,9 @@ public class Specialty {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private CommonStatus status = CommonStatus.ACTIVE;
+
+    @OneToMany(mappedBy = "specialty")
+    private List<Doctor> doctors = new ArrayList<>();
 
     @PrePersist
     public void prePersist() {

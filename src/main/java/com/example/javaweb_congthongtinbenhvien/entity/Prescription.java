@@ -19,9 +19,8 @@ public class Prescription {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
     @OneToOne
-    @JoinColumn(name = "medical_record_id", nullable = false, unique = true)
+    @JoinColumn(name = "record_id", nullable = false, unique = true)
     private MedicalRecord medicalRecord;
 
     @Enumerated(EnumType.STRING)
@@ -33,7 +32,6 @@ public class Prescription {
 
     @Column(name = "dispensed_at")
     private LocalDateTime dispensedAt;
-
 
     @ManyToOne
     @JoinColumn(name = "dispensed_by")

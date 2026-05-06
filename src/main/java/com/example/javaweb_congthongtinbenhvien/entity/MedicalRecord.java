@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -28,10 +30,10 @@ public class MedicalRecord {
     @JoinColumn(name = "doctor_id", nullable = false)
     private Doctor doctor;
 
-    @Column(nullable = false, columnDefinition = "text")
+    @Column(columnDefinition = "text")
     private String symptoms;
 
-    @Column(nullable = false, columnDefinition = "text")
+    @Column(columnDefinition = "text")
     private String diagnosis;
 
     @Column(name = "treatment_plan", columnDefinition = "text")
@@ -43,8 +45,11 @@ public class MedicalRecord {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @OneToOne(mappedBy = "medicalRecord", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "medicalRecord", cascade = CascadeType.ALL, orphanRemoval = true)
     private Prescription prescription;
+
+    @OneToMany(mappedBy = "medicalRecord", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MedicalTest> medicalTests = new ArrayList<>();
 
     @PrePersist
     public void prePersist() {

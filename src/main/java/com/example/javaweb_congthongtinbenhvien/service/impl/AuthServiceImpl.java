@@ -23,7 +23,15 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public User login(String email, String password) {
-        User user = userRepository.findByEmail(email)
+        if (email == null || email.isBlank()) {
+            return null;
+        }
+
+        if (password == null || password.isBlank()) {
+            return null;
+        }
+
+        User user = userRepository.findByEmail(email.trim().toLowerCase())
                 .orElse(null);
 
         if (user == null) {
@@ -54,25 +62,34 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException("Mật khẩu không được để trống");
         }
 
+        if (request.getConfirmPassword() == null || request.getConfirmPassword().isBlank()) {
+            throw new RuntimeException("Mật khẩu xác nhận không được để trống");
+        }
+
         if (!request.getPassword().equals(request.getConfirmPassword())) {
             throw new RuntimeException("Mật khẩu xác nhận không khớp");
         }
 
-        if (userRepository.existsByEmail(request.getEmail())) {
+        String email = request.getEmail().trim().toLowerCase();
+
+        if (userRepository.existsByEmail(email)) {
             throw new RuntimeException("Email đã tồn tại");
         }
 
-        if (request.getPhone() != null && !request.getPhone().isBlank()
-                && userRepository.existsByPhone(request.getPhone())) {
+        if (request.getPhone() != null
+                && !request.getPhone().isBlank()
+                && userRepository.existsByPhone(request.getPhone().trim())) {
             throw new RuntimeException("Số điện thoại đã tồn tại");
         }
 
         User user = new User();
-        user.setEmail(request.getEmail().trim().toLowerCase());
+        user.setEmail(email);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setFullName(request.getFullName());
-        user.setPhone(request.getPhone());
-        user.setRole(request.getRole() == null ? Role.PATIENT : request.getRole());
+        user.setPhone(request.getPhone() == null ? null : request.getPhone().trim());
+
+        user.setRole(Role.PATIENT);
+
         user.setStatus(UserStatus.ACTIVE);
 
         User savedUser = userRepository.save(user);

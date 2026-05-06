@@ -42,22 +42,29 @@ public class PrescriptionServiceImpl implements PrescriptionService {
     public void dispensePrescription(Long prescriptionId, Long userId) {
         Prescription prescription = findById(prescriptionId);
 
-        if (prescription.getStatus() == PrescriptionStatus.DISPENSED) {
-            throw new RuntimeException("Đơn thuốc đã được cấp phát");
-        }
-
-        if (prescription.getStatus() == PrescriptionStatus.CANCELLED) {
-            throw new RuntimeException("Đơn thuốc đã bị hủy");
+        if (prescription.getStatus() != PrescriptionStatus.WAITING_DISPENSE) {
+            throw new RuntimeException("Chỉ được cấp phát đơn thuốc đang chờ cấp phát");
         }
 
         if (prescription.getDetails() == null || prescription.getDetails().isEmpty()) {
             throw new RuntimeException("Đơn thuốc không có thuốc");
         }
 
+        User dispensedBy = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người cấp phát"));
+
         for (PrescriptionDetail detail : prescription.getDetails()) {
             Medicine medicine = detail.getMedicine();
 
-            if (medicine.getStockQuantity() < detail.getQuantity()) {
+            if (medicine == null) {
+                throw new RuntimeException("Chi tiết đơn thuốc không hợp lệ");
+            }
+
+            if (detail.getQuantity() == null || detail.getQuantity() <= 0) {
+                throw new RuntimeException("Số lượng thuốc không hợp lệ");
+            }
+
+            if (medicine.getStockQuantity() == null || medicine.getStockQuantity() < detail.getQuantity()) {
                 throw new RuntimeException(
                         "Thuốc " + medicine.getName() + " không đủ tồn kho"
                 );
@@ -69,9 +76,6 @@ public class PrescriptionServiceImpl implements PrescriptionService {
             medicine.setStockQuantity(medicine.getStockQuantity() - detail.getQuantity());
             medicineRepository.save(medicine);
         }
-
-        User dispensedBy = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người cấp phát"));
 
         prescription.setStatus(PrescriptionStatus.DISPENSED);
         prescription.setDispensedAt(LocalDateTime.now());

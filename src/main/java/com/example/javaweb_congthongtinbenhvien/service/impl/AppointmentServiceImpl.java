@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -36,18 +35,17 @@ public class AppointmentServiceImpl implements AppointmentService {
         Doctor doctor = doctorRepository.findById(request.getDoctorId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy bác sĩ"));
 
-        boolean exists = appointmentRepository
-                .existsByDoctorIdAndAppointmentDateAndStartTimeAndEndTimeAndStatusIn(
-                        request.getDoctorId(),
-                        request.getAppointmentDate(),
-                        request.getStartTime(),
-                        request.getEndTime(),
-                        List.of(
-                                AppointmentStatus.PENDING,
-                                AppointmentStatus.CONFIRMED,
-                                AppointmentStatus.WAITING
-                        )
-                );
+        boolean exists = appointmentRepository.existsOverlapAppointment(
+                request.getDoctorId(),
+                request.getAppointmentDate(),
+                request.getStartTime(),
+                request.getEndTime(),
+                List.of(
+                        AppointmentStatus.PENDING,
+                        AppointmentStatus.CONFIRMED,
+                        AppointmentStatus.WAITING
+                )
+        );
 
         if (exists) {
             throw new RuntimeException("Khung giờ này đã có người đặt");
@@ -60,7 +58,8 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.setStartTime(request.getStartTime());
         appointment.setEndTime(request.getEndTime());
         appointment.setReason(request.getReason());
-        appointment.setStatus(AppointmentStatus.CONFIRMED);
+
+        appointment.setStatus(AppointmentStatus.WAITING);
 
         return appointmentRepository.save(appointment);
     }
@@ -122,6 +121,14 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     private void validateAppointmentTime(AppointmentRequest request) {
+        if (request.getPatientId() == null) {
+            throw new RuntimeException("Bệnh nhân không được để trống");
+        }
+
+        if (request.getDoctorId() == null) {
+            throw new RuntimeException("Bác sĩ không được để trống");
+        }
+
         if (request.getAppointmentDate() == null) {
             throw new RuntimeException("Ngày khám không được để trống");
         }
@@ -140,10 +147,6 @@ public class AppointmentServiceImpl implements AppointmentService {
         );
 
         if (appointmentDateTime.isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Không được đặt lịch trong quá khứ");
-        }
-
-        if (request.getAppointmentDate().isBefore(LocalDate.now())) {
             throw new RuntimeException("Không được đặt lịch trong quá khứ");
         }
     }

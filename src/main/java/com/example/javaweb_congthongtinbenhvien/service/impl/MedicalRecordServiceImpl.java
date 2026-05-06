@@ -2,7 +2,11 @@ package com.example.javaweb_congthongtinbenhvien.service.impl;
 
 import com.example.javaweb_congthongtinbenhvien.dto.MedicalRecordRequest;
 import com.example.javaweb_congthongtinbenhvien.dto.PrescriptionDetailRequest;
-import com.example.javaweb_congthongtinbenhvien.entity.*;
+import com.example.javaweb_congthongtinbenhvien.entity.Appointment;
+import com.example.javaweb_congthongtinbenhvien.entity.MedicalRecord;
+import com.example.javaweb_congthongtinbenhvien.entity.Medicine;
+import com.example.javaweb_congthongtinbenhvien.entity.Prescription;
+import com.example.javaweb_congthongtinbenhvien.entity.PrescriptionDetail;
 import com.example.javaweb_congthongtinbenhvien.entity.enums.AppointmentStatus;
 import com.example.javaweb_congthongtinbenhvien.entity.enums.PrescriptionStatus;
 import com.example.javaweb_congthongtinbenhvien.repository.AppointmentRepository;
@@ -28,6 +32,10 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     @Override
     @Transactional
     public MedicalRecord createMedicalRecord(MedicalRecordRequest request) {
+        if (request.getAppointmentId() == null) {
+            throw new RuntimeException("Lịch khám không được để trống");
+        }
+
         Appointment appointment = appointmentRepository.findById(request.getAppointmentId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy lịch khám"));
 
@@ -39,6 +47,14 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
             throw new RuntimeException("Lịch khám đã bị hủy");
         }
 
+        if (appointment.getStatus() != AppointmentStatus.WAITING) {
+            throw new RuntimeException("Chỉ được khám lịch đang ở trạng thái chờ khám");
+        }
+
+        if (appointment.getMedicalRecord() != null) {
+            throw new RuntimeException("Lịch khám này đã có hồ sơ bệnh án");
+        }
+
         if (request.getSymptoms() == null || request.getSymptoms().isBlank()) {
             throw new RuntimeException("Triệu chứng không được để trống");
         }
@@ -47,8 +63,9 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
             throw new RuntimeException("Chẩn đoán không được để trống");
         }
 
-        appointment.setStatus(AppointmentStatus.COMPLETED);
-        appointmentRepository.save(appointment);
+        if (request.getPrescriptionDetails() == null || request.getPrescriptionDetails().isEmpty()) {
+            throw new RuntimeException("Đơn thuốc phải có ít nhất 1 loại thuốc");
+        }
 
         MedicalRecord medicalRecord = new MedicalRecord();
         medicalRecord.setAppointment(appointment);
@@ -65,31 +82,32 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
         prescription.setMedicalRecord(savedRecord);
         prescription.setStatus(PrescriptionStatus.WAITING_DISPENSE);
 
-        if (request.getPrescriptionDetails() != null) {
-            for (PrescriptionDetailRequest detailRequest : request.getPrescriptionDetails()) {
-                if (detailRequest.getMedicineId() == null) {
-                    continue;
-                }
-
-                if (detailRequest.getQuantity() == null || detailRequest.getQuantity() <= 0) {
-                    throw new RuntimeException("Số lượng thuốc phải lớn hơn 0");
-                }
-
-                Medicine medicine = medicineRepository.findById(detailRequest.getMedicineId())
-                        .orElseThrow(() -> new RuntimeException("Không tìm thấy thuốc"));
-
-                PrescriptionDetail detail = new PrescriptionDetail();
-                detail.setPrescription(prescription);
-                detail.setMedicine(medicine);
-                detail.setQuantity(detailRequest.getQuantity());
-                detail.setDosage(detailRequest.getDosage());
-                detail.setUsageInstruction(detailRequest.getUsageInstruction());
-
-                prescription.getDetails().add(detail);
+        for (PrescriptionDetailRequest detailRequest : request.getPrescriptionDetails()) {
+            if (detailRequest.getMedicineId() == null) {
+                throw new RuntimeException("Thuốc không được để trống");
             }
+
+            if (detailRequest.getQuantity() == null || detailRequest.getQuantity() <= 0) {
+                throw new RuntimeException("Số lượng thuốc phải lớn hơn 0");
+            }
+
+            Medicine medicine = medicineRepository.findById(detailRequest.getMedicineId())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy thuốc"));
+
+            PrescriptionDetail detail = new PrescriptionDetail();
+            detail.setPrescription(prescription);
+            detail.setMedicine(medicine);
+            detail.setQuantity(detailRequest.getQuantity());
+            detail.setDosage(detailRequest.getDosage());
+            detail.setUsageInstruction(detailRequest.getUsageInstruction());
+
+            prescription.getDetails().add(detail);
         }
 
         prescriptionRepository.save(prescription);
+
+        appointment.setStatus(AppointmentStatus.COMPLETED);
+        appointmentRepository.save(appointment);
 
         return savedRecord;
     }

@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -22,37 +21,21 @@ public class UserProfile {
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
+    @Column(name = "full_name", length = 100)
+    private String fullName;
+
+    @Column(name = "dob")
+    private LocalDate dob;
+
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    @Column(name = "date_of_birth")
-    private LocalDate dateOfBirth;
-
+    @Column(length = 255)
     private String address;
 
-    @Column(name = "identity_number", length = 30)
-    private String identityNumber;
+    @Column(length = 20)
+    private String phone;
 
-    @Column(name = "health_insurance_code", length = 50)
-    private String healthInsuranceCode;
-
-    @Column(name = "emergency_contact", length = 100)
-    private String emergencyContact;
-
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    @PrePersist
-    public void prePersist() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    public void preUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
+    @Column(length = 100)
+    private String email;
 }
