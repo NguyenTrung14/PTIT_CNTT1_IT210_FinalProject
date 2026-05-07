@@ -11,17 +11,7 @@
 </head>
 <body class="bg-light">
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <div class="container">
-        <a class="navbar-brand" th:href="@{/patient/dashboard}">Bệnh nhân</a>
-
-        <div>
-            <a class="btn btn-outline-light btn-sm" th:href="@{/patient/appointments}">Lịch khám của tôi</a>
-            <a class="btn btn-outline-light btn-sm" th:href="@{/patient/appointments/book}">Đặt lịch</a>
-            <a class="btn btn-light btn-sm" th:href="@{/logout}">Đăng xuất</a>
-        </div>
-    </div>
-</nav>
+<nav th:replace="~{fragments/navbar :: main('PATIENT', 'history')}"></nav>
 
 <div class="container py-4">
 

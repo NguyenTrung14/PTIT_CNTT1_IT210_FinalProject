@@ -11,18 +11,7 @@
 </head>
 <body class="bg-light">
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-success">
-    <div class="container">
-        <a class="navbar-brand" th:href="@{/doctor/dashboard}">Bác sĩ</a>
-
-        <div>
-            <a class="btn btn-outline-light btn-sm" th:href="@{/doctor/prescriptions/waiting}">
-                Đơn thuốc chờ cấp phát
-            </a>
-            <a class="btn btn-light btn-sm" th:href="@{/logout}">Đăng xuất</a>
-        </div>
-    </div>
-</nav>
+<nav th:replace="~{fragments/navbar :: main('DOCTOR', 'appointments')}"></nav>
 
 <div class="container py-4">
 

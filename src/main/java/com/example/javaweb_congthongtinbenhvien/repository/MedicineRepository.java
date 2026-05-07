@@ -11,6 +11,8 @@ public interface MedicineRepository extends JpaRepository<Medicine, Long> {
 
     Optional<Medicine> findByName(String name);
 
+    Optional<Medicine> findFirstByStatusOrderByIdAsc(MedicineStatus status);
+
     boolean existsByName(String name);
 
     List<Medicine> findByStatus(MedicineStatus status);

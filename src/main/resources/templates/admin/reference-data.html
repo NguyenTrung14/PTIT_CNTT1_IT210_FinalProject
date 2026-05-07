@@ -11,18 +11,7 @@
 
 <body class="bg-light">
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container">
-        <a class="navbar-brand fw-bold" th:href="@{/admin/dashboard}">Quan tri he thong</a>
-
-        <div class="d-flex gap-2">
-            <a class="btn btn-outline-light btn-sm" th:href="@{/admin/dashboard}">Dashboard</a>
-            <a class="btn btn-outline-light btn-sm" th:href="@{/admin/medicines}">Quan ly thuoc</a>
-            <a class="btn btn-outline-light btn-sm" th:href="@{/admin/prescriptions/waiting}">Cap phat thuoc</a>
-            <a class="btn btn-light btn-sm" th:href="@{/logout}">Dang xuat</a>
-        </div>
-    </div>
-</nav>
+<nav th:replace="~{fragments/navbar :: main('ADMIN', 'reference')}"></nav>
 
 <div class="container py-4">
     <div class="mb-4">

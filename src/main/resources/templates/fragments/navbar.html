@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+<nav th:fragment="main(role, active)"
+     class="navbar navbar-expand-lg navbar-dark app-sidebar"
+     th:classappend="${role == 'DOCTOR'} ? ' bg-success' : (${role == 'PATIENT'} ? ' bg-primary' : ' bg-dark')">
+    <div class="container">
+        <a class="navbar-brand fw-bold"
+           th:href="${role == 'DOCTOR'} ? @{/doctor/dashboard} : (${role == 'PATIENT'} ? @{/patient/dashboard} : @{/admin/dashboard})"
+           th:text="${role == 'DOCTOR'} ? 'Cổng bác sĩ' : (${role == 'PATIENT'} ? 'Cổng bệnh nhân' : 'Quản trị hệ thống')">
+            Navbar
+        </a>
+
+        <div class="app-navbar-nav">
+            <a class="nav-link"
+               th:classappend="${active == 'dashboard'} ? ' active' : ''"
+               th:href="${role == 'DOCTOR'} ? @{/doctor/dashboard} : (${role == 'PATIENT'} ? @{/patient/dashboard} : @{/admin/dashboard})">
+                Dashboard
+            </a>
+
+            <a th:if="${role == 'ADMIN'}"
+               class="nav-link"
+               th:classappend="${active == 'medicines'} ? ' active' : ''"
+               th:href="@{/admin/medicines}">
+                Quản lý thuốc
+            </a>
+
+            <a th:if="${role == 'ADMIN'}"
+               class="nav-link"
+               th:classappend="${active == 'users'} ? ' active' : ''"
+               th:href="@{/admin/users}">
+                Nguoi dung
+            </a>
+
+            <a th:if="${role == 'ADMIN'}"
+               class="nav-link"
+               th:classappend="${active == 'reference'} ? ' active' : ''"
+               th:href="@{/admin/reference-data}">
+                Dữ liệu nền
+            </a>
+
+            <a th:if="${role == 'ADMIN'}"
+               class="nav-link"
+               th:classappend="${active == 'prescriptions'} ? ' active' : ''"
+               th:href="@{/admin/prescriptions/waiting}">
+                Cấp phát thuốc
+            </a>
+
+            <a th:if="${role == 'DOCTOR'}"
+               class="nav-link"
+               th:classappend="${active == 'appointments'} ? ' active' : ''"
+               th:href="@{/doctor/appointments}">
+                Lịch khám
+            </a>
+
+            <a th:if="${role == 'DOCTOR'}"
+               class="nav-link"
+               th:classappend="${active == 'prescriptions'} ? ' active' : ''"
+               th:href="@{/doctor/prescriptions/waiting}">
+                Đơn thuốc
+            </a>
+
+            <a th:if="${role == 'DOCTOR'}"
+               class="nav-link"
+               th:classappend="${active == 'profile'} ? ' active' : ''"
+               th:href="@{/doctor/profile}">
+                Hồ sơ
+            </a>
+
+            <a th:if="${role == 'PATIENT'}"
+               class="nav-link"
+               th:classappend="${active == 'profile'} ? ' active' : ''"
+               th:href="@{/patient/profile}">
+                Hồ sơ
+            </a>
+
+            <a th:if="${role == 'PATIENT'}"
+               class="nav-link"
+               th:classappend="${active == 'book'} ? ' active' : ''"
+               th:href="@{/patient/appointments/book}">
+                Đặt lịch
+            </a>
+
+            <a th:if="${role == 'PATIENT'}"
+               class="nav-link"
+               th:classappend="${active == 'appointments'} ? ' active' : ''"
+               th:href="@{/patient/appointments}">
+                Lịch của tôi
+            </a>
+
+            <a th:if="${role == 'PATIENT'}"
+               class="nav-link"
+               th:classappend="${active == 'history'} ? ' active' : ''"
+               th:href="@{/patient/medical-history}">
+                Bệnh án
+            </a>
+
+            <a class="nav-link nav-link-logout" th:href="@{/logout}">
+                Đăng xuất
+            </a>
+        </div>
+    </div>
+</nav>
+</body>
+</html>

@@ -11,18 +11,7 @@
 
 <body class="bg-light">
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-success">
-    <div class="container">
-        <a class="navbar-brand fw-bold" th:href="@{/doctor/dashboard}">Cổng bác sĩ</a>
-
-        <div class="d-flex gap-2">
-            <a class="btn btn-outline-light btn-sm" th:href="@{/doctor/dashboard}">Dashboard</a>
-            <a class="btn btn-outline-light btn-sm" th:href="@{/doctor/appointments}">Lịch khám</a>
-            <a class="btn btn-outline-light btn-sm" th:href="@{/doctor/prescriptions/waiting}">Đơn thuốc</a>
-            <a class="btn btn-light btn-sm" th:href="@{/logout}">Đăng xuất</a>
-        </div>
-    </div>
-</nav>
+<nav th:replace="~{fragments/navbar :: main('DOCTOR', 'profile')}"></nav>
 
 <div class="container py-4">
 

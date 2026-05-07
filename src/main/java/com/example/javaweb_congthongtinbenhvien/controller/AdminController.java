@@ -4,6 +4,8 @@ import com.example.javaweb_congthongtinbenhvien.dto.ProfileRequest;
 import com.example.javaweb_congthongtinbenhvien.entity.User;
 import com.example.javaweb_congthongtinbenhvien.entity.UserProfile;
 import com.example.javaweb_congthongtinbenhvien.entity.enums.CommonStatus;
+import com.example.javaweb_congthongtinbenhvien.entity.enums.Role;
+import com.example.javaweb_congthongtinbenhvien.entity.enums.UserStatus;
 import com.example.javaweb_congthongtinbenhvien.repository.SpecialtyRepository;
 import com.example.javaweb_congthongtinbenhvien.repository.TestTypeRepository;
 import com.example.javaweb_congthongtinbenhvien.service.MedicineService;
@@ -15,8 +17,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -56,6 +60,46 @@ public class AdminController {
         model.addAttribute("testTypes", testTypeRepository.findByStatus(CommonStatus.ACTIVE));
 
         return "admin/reference-data";
+    }
+
+    @GetMapping("/admin/users")
+    public String users(
+            Model model,
+            HttpSession session
+    ) {
+        User loginUser = getLoginUser(session);
+
+        model.addAttribute("loginUser", loginUser);
+        model.addAttribute("users", userService.findAll());
+        model.addAttribute("statuses", UserStatus.values());
+
+        return "admin/users";
+    }
+
+    @PostMapping("/admin/users/{id}/status")
+    public String updateUserStatus(
+            @PathVariable Long id,
+            @RequestParam UserStatus status,
+            HttpSession session,
+            RedirectAttributes redirectAttributes
+    ) {
+        try {
+            User loginUser = getLoginUser(session);
+
+            User targetUser = userService.findById(id);
+
+            if (targetUser.getRole() == Role.ADMIN) {
+                redirectAttributes.addFlashAttribute("error", "Khong the doi trang thai tai khoan admin");
+                return "redirect:/admin/users";
+            }
+
+            userService.updateStatus(id, status);
+            redirectAttributes.addFlashAttribute("success", "Cap nhat trang thai tai khoan thanh cong");
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+
+        return "redirect:/admin/users";
     }
 
     @GetMapping("/admin/profile")

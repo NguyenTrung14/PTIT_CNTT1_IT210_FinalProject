@@ -3,6 +3,7 @@ package com.example.javaweb_congthongtinbenhvien.service.impl;
 import com.example.javaweb_congthongtinbenhvien.dto.ProfileRequest;
 import com.example.javaweb_congthongtinbenhvien.entity.User;
 import com.example.javaweb_congthongtinbenhvien.entity.UserProfile;
+import com.example.javaweb_congthongtinbenhvien.entity.enums.UserStatus;
 import com.example.javaweb_congthongtinbenhvien.repository.UserProfileRepository;
 import com.example.javaweb_congthongtinbenhvien.repository.UserRepository;
 import com.example.javaweb_congthongtinbenhvien.service.UserService;
@@ -60,5 +61,17 @@ public class UserServiceImpl implements UserService {
         profile.setEmergencyContact(request.getEmergencyContact());
 
         userProfileRepository.save(profile);
+    }
+
+    @Override
+    @Transactional
+    public void updateStatus(Long userId, UserStatus status) {
+        if (status == null) {
+            throw new RuntimeException("Trang thai tai khoan khong hop le");
+        }
+
+        User user = findById(userId);
+        user.setStatus(status);
+        userRepository.save(user);
     }
 }

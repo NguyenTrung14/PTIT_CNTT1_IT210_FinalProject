@@ -44,19 +44,24 @@ public class MedicineServiceImpl implements MedicineService {
     @Override
     @Transactional
     public void save(MedicineRequest request) {
-        if (medicineRepository.existsByName(request.getName())) {
-            throw new RuntimeException("Tên thuốc đã tồn tại");
-        }
-
         validateMedicine(request);
 
-        Medicine medicine = new Medicine();
+        Medicine medicine = medicineRepository.findByName(request.getName())
+                .map(existing -> {
+                    if (existing.getStatus() == MedicineStatus.ACTIVE) {
+                        throw new RuntimeException("Tên thuốc đã tồn tại");
+                    }
+                    return existing;
+                })
+                .orElseGet(() -> medicineRepository
+                        .findFirstByStatusOrderByIdAsc(MedicineStatus.DELETED)
+                        .orElseGet(Medicine::new));
         medicine.setName(request.getName());
         medicine.setUnit(request.getUnit());
         medicine.setPrice(request.getPrice());
         medicine.setStockQuantity(request.getStockQuantity());
         medicine.setDescription(request.getDescription());
-        medicine.setStatus(MedicineStatus.ACTIVE);
+        medicine.setStatus(request.getStatus() == null ? MedicineStatus.ACTIVE : request.getStatus());
 
         medicineRepository.save(medicine);
     }
@@ -79,6 +84,7 @@ public class MedicineServiceImpl implements MedicineService {
         medicine.setPrice(request.getPrice());
         medicine.setStockQuantity(request.getStockQuantity());
         medicine.setDescription(request.getDescription());
+        medicine.setStatus(request.getStatus() == null ? MedicineStatus.ACTIVE : request.getStatus());
 
         medicineRepository.save(medicine);
     }

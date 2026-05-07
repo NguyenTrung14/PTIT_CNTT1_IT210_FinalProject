@@ -61,6 +61,7 @@ public class MedicineController {
         request.setPrice(medicine.getPrice());
         request.setStockQuantity(medicine.getStockQuantity());
         request.setDescription(medicine.getDescription());
+        request.setStatus(medicine.getStatus());
 
         model.addAttribute("medicine", request);
         return "admin/medicines/form";

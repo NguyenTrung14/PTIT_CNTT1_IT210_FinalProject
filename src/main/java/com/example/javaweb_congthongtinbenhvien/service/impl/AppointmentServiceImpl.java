@@ -31,6 +31,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final PaymentRepository paymentRepository;
 
     private static final BigDecimal APPOINTMENT_FEE = new BigDecimal("100000");
+    private static final long MIN_PATIENT_APPOINTMENT_GAP_MINUTES = 30;
 
     @Override
     @Transactional
@@ -51,16 +52,22 @@ public class AppointmentServiceImpl implements AppointmentService {
             throw new RuntimeException("Bac si khong thuoc chuyen khoa da chon");
         }
 
+        List<AppointmentStatus> activeStatuses = List.of(
+                AppointmentStatus.PENDING,
+                AppointmentStatus.CONFIRMED,
+                AppointmentStatus.WAITING
+        );
+
+        if (hasPatientScheduleConflict(request, activeStatuses)) {
+            throw new RuntimeException("Lich kham cua ban phai cach lich khac toi thieu 30 phut");
+        }
+
         boolean exists = appointmentRepository.existsOverlapAppointment(
                 request.getDoctorId(),
                 request.getAppointmentDate(),
                 request.getStartTime(),
                 request.getEndTime(),
-                List.of(
-                        AppointmentStatus.PENDING,
-                        AppointmentStatus.CONFIRMED,
-                        AppointmentStatus.WAITING
-                )
+                activeStatuses
         );
 
         if (exists) {
@@ -98,7 +105,12 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     public List<Appointment> findByPatientId(Long patientId) {
-        return appointmentRepository.findByPatientIdOrderByAppointmentDateDescStartTimeDesc(patientId);
+        LocalDateTime now = LocalDateTime.now();
+
+        return appointmentRepository.findByPatientId(patientId)
+                .stream()
+                .sorted((left, right) -> compareByNearestAppointmentTime(left, right, now))
+                .toList();
     }
 
     @Override
@@ -189,5 +201,63 @@ public class AppointmentServiceImpl implements AppointmentService {
         if (appointmentDateTime.isBefore(LocalDateTime.now())) {
             throw new RuntimeException("Không được đặt lịch trong quá khứ");
         }
+    }
+
+    private static boolean isPastAppointment(Appointment appointment, LocalDateTime now) {
+        return appointmentDateTime(appointment).isBefore(now);
+    }
+
+    private static LocalDateTime appointmentDateTime(Appointment appointment) {
+        return LocalDateTime.of(appointment.getAppointmentDate(), appointment.getStartTime());
+    }
+
+    private boolean hasPatientScheduleConflict(
+            AppointmentRequest request,
+            List<AppointmentStatus> activeStatuses
+    ) {
+        LocalDateTime requestedStart = LocalDateTime.of(request.getAppointmentDate(), request.getStartTime());
+        LocalDateTime requestedEnd = LocalDateTime.of(request.getAppointmentDate(), request.getEndTime());
+
+        return appointmentRepository.findByPatientIdAndAppointmentDateAndStatusIn(
+                        request.getPatientId(),
+                        request.getAppointmentDate(),
+                        activeStatuses
+                )
+                .stream()
+                .anyMatch(existing -> {
+                    LocalDateTime existingStart = LocalDateTime.of(
+                            existing.getAppointmentDate(),
+                            existing.getStartTime()
+                    );
+                    LocalDateTime existingEnd = LocalDateTime.of(
+                            existing.getAppointmentDate(),
+                            existing.getEndTime()
+                    );
+
+                    return requestedStart.isBefore(existingEnd.plusMinutes(MIN_PATIENT_APPOINTMENT_GAP_MINUTES))
+                            && requestedEnd.plusMinutes(MIN_PATIENT_APPOINTMENT_GAP_MINUTES).isAfter(existingStart);
+                });
+    }
+
+    private static int compareByNearestAppointmentTime(
+            Appointment left,
+            Appointment right,
+            LocalDateTime now
+    ) {
+        boolean leftPast = isPastAppointment(left, now);
+        boolean rightPast = isPastAppointment(right, now);
+
+        if (leftPast != rightPast) {
+            return Boolean.compare(leftPast, rightPast);
+        }
+
+        LocalDateTime leftTime = appointmentDateTime(left);
+        LocalDateTime rightTime = appointmentDateTime(right);
+
+        if (leftPast) {
+            return rightTime.compareTo(leftTime);
+        }
+
+        return leftTime.compareTo(rightTime);
     }
 }

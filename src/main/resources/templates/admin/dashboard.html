@@ -11,18 +11,7 @@
 
 <body class="bg-light">
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container">
-        <a class="navbar-brand fw-bold" th:href="@{/admin/dashboard}">Quan tri he thong</a>
-
-        <div class="d-flex gap-2">
-            <a class="btn btn-outline-light btn-sm" th:href="@{/admin/medicines}">Quan ly thuoc</a>
-            <a class="btn btn-outline-light btn-sm" th:href="@{/admin/reference-data}">Du lieu nen</a>
-            <a class="btn btn-outline-light btn-sm" th:href="@{/admin/prescriptions/waiting}">Cap phat thuoc</a>
-            <a class="btn btn-light btn-sm" th:href="@{/logout}">Dang xuat</a>
-        </div>
-    </div>
-</nav>
+<nav th:replace="~{fragments/navbar :: main('ADMIN', 'dashboard')}"></nav>
 
 <div class="container py-4">
 
@@ -34,117 +23,110 @@
         <p class="text-muted mb-0">Quan ly thuoc, nguoi dung, du lieu nen va cap phat don thuoc.</p>
     </div>
 
-    <div class="row g-3 mb-4">
-        <div class="col-md-3">
-            <div class="card shadow-sm border-0">
-                <div class="card-body">
-                    <h6 class="text-muted">Tong nguoi dung</h6>
-                    <h2 th:text="${#lists.size(users)}">0</h2>
-                </div>
+    <div class="admin-action-grid mb-4">
+        <div class="card admin-action-card">
+            <h6>Nguoi dung</h6>
+            <div class="admin-metric" th:text="${#lists.size(users)}">0</div>
+            <div class="admin-metric-row">
+                <span class="admin-metric-pill">Tai khoan trong he thong</span>
             </div>
+            <a th:href="@{/admin/users}" class="btn btn-outline-secondary btn-sm">Quan ly</a>
         </div>
 
-        <div class="col-md-3">
-            <div class="card shadow-sm border-0">
-                <div class="card-body">
-                    <h6 class="text-muted">Thuoc dang hoat dong</h6>
-                    <h2 th:text="${#lists.size(medicines)}">0</h2>
-                    <a th:href="@{/admin/medicines}" class="btn btn-dark btn-sm">Quan ly thuoc</a>
-                </div>
+        <div class="card admin-action-card">
+            <h6>Quan ly thuoc</h6>
+            <div class="admin-metric" th:text="${#lists.size(medicines)}">0</div>
+            <div class="admin-metric-row">
+                <span class="admin-metric-pill">Dang hoat dong</span>
             </div>
+            <a th:href="@{/admin/medicines}" class="btn btn-dark btn-sm">Mo danh muc</a>
         </div>
 
-        <div class="col-md-3">
-            <div class="card shadow-sm border-0">
-                <div class="card-body">
-                    <h6 class="text-muted">Don thuoc cho cap phat</h6>
-                    <h2 th:text="${#lists.size(waitingPrescriptions)}">0</h2>
-                    <a th:href="@{/admin/prescriptions/waiting}" class="btn btn-warning btn-sm">Xu ly don thuoc</a>
-                </div>
+        <div class="card admin-action-card">
+            <h6>Cap phat thuoc</h6>
+            <div class="admin-metric" th:text="${#lists.size(waitingPrescriptions)}">0</div>
+            <div class="admin-metric-row">
+                <span class="admin-metric-pill">Don dang cho</span>
             </div>
+            <a th:href="@{/admin/prescriptions/waiting}" class="btn btn-warning btn-sm">Xu ly</a>
         </div>
 
-        <div class="col-md-3">
-            <div class="card shadow-sm border-0">
-                <div class="card-body">
-                    <h6 class="text-muted">Du lieu nen</h6>
-                    <h2>
-                        <span th:text="${#lists.size(specialties)}">0</span>
-                        /
-                        <span th:text="${#lists.size(testTypes)}">0</span>
-                    </h2>
-                    <a th:href="@{/admin/reference-data}" class="btn btn-info btn-sm">Xem danh muc</a>
-                </div>
+        <div class="card admin-action-card">
+            <h6>Du lieu nen</h6>
+            <div class="admin-metric">
+                <span th:text="${#lists.size(specialties)}">0</span>
+                /
+                <span th:text="${#lists.size(testTypes)}">0</span>
             </div>
+            <div class="admin-metric-row">
+                <span class="admin-metric-pill">Chuyen khoa / xet nghiem</span>
+            </div>
+            <a th:href="@{/admin/reference-data}" class="btn btn-info btn-sm">Xem danh muc</a>
         </div>
     </div>
 
-    <div class="row g-3 mb-4">
-        <div class="col-lg-4">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-header bg-white">
-                    <strong>Doanh thu da thanh toan</strong>
-                </div>
-                <div class="card-body">
-                    <h3 th:text="${#numbers.formatDecimal(totalRevenue, 0, 'COMMA', 0, 'POINT')} + ' VND'">0 VND</h3>
-                    <p class="text-muted mb-0">Tong tien tu cac giao dich PAID.</p>
-                </div>
+    <div class="dashboard-report-grid mb-4">
+        <details class="card dashboard-report-card" open>
+            <summary>
+                <span>Doanh thu da thanh toan</span>
+                <strong th:text="${#numbers.formatDecimal(totalRevenue, 0, 'COMMA', 0, 'POINT')} + ' VND'">0 VND</strong>
+            </summary>
+            <div class="dashboard-report-body">
+                <p class="text-muted mb-0">Tong tien tu cac giao dich PAID.</p>
             </div>
-        </div>
+        </details>
 
-        <div class="col-lg-4">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-header bg-white">
-                    <strong>Doanh thu theo thang</strong>
-                </div>
-                <div class="card-body">
-                    <table class="table table-sm table-bordered mb-0">
-                        <thead class="table-light">
-                        <tr>
-                            <th>Thang</th>
-                            <th>Doanh thu</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr th:if="${#lists.isEmpty(revenueByMonth)}">
-                            <td colspan="2" class="text-center text-muted">Chua co du lieu.</td>
-                        </tr>
-                        <tr th:each="row : ${revenueByMonth}">
-                            <td th:text="|${row[1]}/${row[0]}|">5/2026</td>
-                            <td th:text="${#numbers.formatDecimal(row[2], 0, 'COMMA', 0, 'POINT')} + ' VND'">0 VND</td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
+        <details class="card dashboard-report-card">
+            <summary>
+                <span>Doanh thu theo thang</span>
+                <strong th:text="${#lists.size(revenueByMonth)} + ' dong'">0 dong</strong>
+            </summary>
+            <div class="dashboard-report-body">
+                <table class="table table-sm table-bordered mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Thang</th>
+                        <th>Doanh thu</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${#lists.isEmpty(revenueByMonth)}">
+                        <td colspan="2" class="text-center text-muted">Chua co du lieu.</td>
+                    </tr>
+                    <tr th:each="row : ${revenueByMonth}">
+                        <td th:text="|${row[1]}/${row[0]}|">5/2026</td>
+                        <td th:text="${#numbers.formatDecimal(row[2], 0, 'COMMA', 0, 'POINT')} + ' VND'">0 VND</td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
-        </div>
+        </details>
 
-        <div class="col-lg-4">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-header bg-white">
-                    <strong>Top 5 bac si</strong>
-                </div>
-                <div class="card-body">
-                    <table class="table table-sm table-bordered mb-0">
-                        <thead class="table-light">
-                        <tr>
-                            <th>Bac si</th>
-                            <th>Luot kham</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr th:if="${#lists.isEmpty(topDoctors)}">
-                            <td colspan="2" class="text-center text-muted">Chua co du lieu.</td>
-                        </tr>
-                        <tr th:each="row : ${topDoctors}">
-                            <td th:text="${row[0]}">Bac si</td>
-                            <td th:text="${row[1]}">0</td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
+        <details class="card dashboard-report-card">
+            <summary>
+                <span>Top 5 bac si</span>
+                <strong th:text="${#lists.size(topDoctors)} + ' bac si'">0 bac si</strong>
+            </summary>
+            <div class="dashboard-report-body">
+                <table class="table table-sm table-bordered mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Bac si</th>
+                        <th>Luot kham</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${#lists.isEmpty(topDoctors)}">
+                        <td colspan="2" class="text-center text-muted">Chua co du lieu.</td>
+                    </tr>
+                    <tr th:each="row : ${topDoctors}">
+                        <td th:text="${row[0]}">Bac si</td>
+                        <td th:text="${row[1]}">0</td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
-        </div>
+        </details>
     </div>
 
     <div class="card shadow-sm border-0">

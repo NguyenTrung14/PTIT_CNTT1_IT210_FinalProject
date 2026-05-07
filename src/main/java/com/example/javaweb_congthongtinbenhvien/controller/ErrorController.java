@@ -14,10 +14,12 @@ public class ErrorController {
             Model model
     ) {
         if (loginRequired) {
+            model.addAttribute("loginRequired", "401");
             model.addAttribute("title", "Bạn cần đăng nhập");
             model.addAttribute("message", "Bạn đang truy cập trực tiếp vào trang yêu cầu đăng nhập. Vui lòng đăng nhập để tiếp tục.");
             model.addAttribute("showLogout", false);
         } else {
+            model.addAttribute("loginRequired", "403");
             model.addAttribute("title", "Bạn không có quyền truy cập");
             model.addAttribute("message", "Tài khoản hiện tại không được phép truy cập trang này. Vui lòng quay lại đúng trang chức năng của bạn.");
             model.addAttribute("showLogout", true);

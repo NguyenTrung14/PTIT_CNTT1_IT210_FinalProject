@@ -1,5 +1,6 @@
 package com.example.javaweb_congthongtinbenhvien.dto;
 
+import com.example.javaweb_congthongtinbenhvien.entity.enums.MedicineStatus;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,4 +21,6 @@ public class MedicineRequest {
     private Integer stockQuantity;
 
     private String description;
+
+    private MedicineStatus status;
 }

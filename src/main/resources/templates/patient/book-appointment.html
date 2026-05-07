@@ -11,17 +11,7 @@
 
 <body class="bg-light">
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <div class="container">
-        <a class="navbar-brand fw-bold" th:href="@{/patient/dashboard}">Cổng bệnh nhân</a>
-
-        <div class="d-flex gap-2">
-            <a class="btn btn-outline-light btn-sm" th:href="@{/patient/dashboard}">Dashboard</a>
-            <a class="btn btn-outline-light btn-sm" th:href="@{/patient/appointments}">Lịch của tôi</a>
-            <a class="btn btn-light btn-sm" th:href="@{/logout}">Đăng xuất</a>
-        </div>
-    </div>
-</nav>
+<nav th:replace="~{fragments/navbar :: main('PATIENT', 'book')}"></nav>
 
 <div class="container py-4">
 
@@ -42,24 +32,22 @@
 
                 <div class="mb-3">
                     <label class="form-label">Chuyên khoa</label>
-                    <select class="form-select" name="specialtyId" required>
+                    <select class="form-select" id="specialtySelect" name="specialtyId" required>
                         <option value="">-- Chọn chuyên khoa --</option>
                         <option th:each="specialty : ${specialties}"
                                 th:value="${specialty.id}"
                                 th:text="${specialty.name}">
                         </option>
                     </select>
-                    <small class="text-muted">
-                        Mục này để hiển thị theo SRS. Danh sách bác sĩ bên dưới vẫn lấy toàn bộ bác sĩ đang hoạt động.
-                    </small>
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label">Bác sĩ</label>
-                    <select class="form-select" th:field="*{doctorId}" required>
-                        <option value="">-- Chọn bác sĩ --</option>
+                    <select class="form-select" id="doctorSelect" th:field="*{doctorId}" required disabled>
+                        <option value="">-- Chọn chuyên khoa trước --</option>
                         <option th:each="doctor : ${doctors}"
                                 th:value="${doctor.id}"
+                                th:attr="data-specialty-id=${doctor.specialty.id}"
                                 th:text="${doctor.user.fullName + ' - ' + doctor.specialty.name}">
                         </option>
                     </select>
@@ -103,6 +91,29 @@
         </div>
     </div>
 </div>
+
+<script>
+    const specialtySelect = document.getElementById('specialtySelect');
+    const doctorSelect = document.getElementById('doctorSelect');
+    const doctorOptions = Array.from(doctorSelect.querySelectorAll('option[data-specialty-id]'));
+    const placeholderOption = doctorSelect.querySelector('option[value=""]');
+
+    function filterDoctorsBySpecialty() {
+        const specialtyId = specialtySelect.value;
+        doctorSelect.value = '';
+        doctorSelect.disabled = specialtyId === '';
+        placeholderOption.textContent = specialtyId === ''
+            ? '-- Chọn chuyên khoa trước --'
+            : '-- Chọn bác sĩ --';
+
+        doctorOptions.forEach(option => {
+            option.hidden = option.dataset.specialtyId !== specialtyId;
+        });
+    }
+
+    specialtySelect.addEventListener('change', filterDoctorsBySpecialty);
+    filterDoctorsBySpecialty();
+</script>
 
 </body>
 </html>

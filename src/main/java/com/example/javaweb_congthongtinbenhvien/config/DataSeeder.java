@@ -215,7 +215,143 @@ public class DataSeeder implements CommandLineRunner {
                 "Hà Nội"
         );
 
-        createDoctorIfNotExists(doctorUser);
+        createDoctorIfNotExists(
+                doctorUser,
+                0,
+                "Bac si Chuyen khoa I",
+                8,
+                "P201",
+                "Bac si phu trach kham noi tong quat"
+        );
+
+        User adminDemo = createUserIfNotExists(
+                "admin2@gmail.com",
+                "123456",
+                "Admin Demo",
+                "0900000010",
+                Role.ADMIN
+        );
+
+        createProfileIfNotExists(
+                adminDemo,
+                Gender.MALE,
+                "Ha Noi"
+        );
+
+        User doctorUser1 = createUserIfNotExists(
+                "doctor1@gmail.com",
+                "123456",
+                "Bac si Le Minh An",
+                "0900000011",
+                Role.DOCTOR
+        );
+
+        createProfileIfNotExists(
+                doctorUser1,
+                Gender.MALE,
+                "Ha Noi"
+        );
+
+        createDoctorIfNotExists(
+                doctorUser1,
+                0,
+                "Bac si Chuyen khoa I",
+                6,
+                "P202",
+                "Bac si kham noi tong quat"
+        );
+
+        User doctorUser2 = createUserIfNotExists(
+                "doctor2@gmail.com",
+                "123456",
+                "Bac si Pham Thu Ha",
+                "0900000012",
+                Role.DOCTOR
+        );
+
+        createProfileIfNotExists(
+                doctorUser2,
+                Gender.FEMALE,
+                "Ha Noi"
+        );
+
+        createDoctorIfNotExists(
+                doctorUser2,
+                1,
+                "Thac si Bac si",
+                9,
+                "P203",
+                "Bac si chuyen khoa tim mach"
+        );
+
+        User doctorUser3 = createUserIfNotExists(
+                "doctor3@gmail.com",
+                "123456",
+                "Bac si Tran Quoc Bao",
+                "0900000013",
+                Role.DOCTOR
+        );
+
+        createProfileIfNotExists(
+                doctorUser3,
+                Gender.MALE,
+                "Ha Noi"
+        );
+
+        createDoctorIfNotExists(
+                doctorUser3,
+                2,
+                "Bac si Chuyen khoa II",
+                11,
+                "P204",
+                "Bac si chuyen khoa da lieu"
+        );
+
+        User doctorUser4 = createUserIfNotExists(
+                "doctor4@gmail.com",
+                "123456",
+                "Bac si Nguyen Mai Linh",
+                "0900000014",
+                Role.DOCTOR
+        );
+
+        createProfileIfNotExists(
+                doctorUser4,
+                Gender.FEMALE,
+                "Ha Noi"
+        );
+
+        createDoctorIfNotExists(
+                doctorUser4,
+                3,
+                "Bac si Chuyen khoa I",
+                7,
+                "P205",
+                "Bac si chuyen khoa tai mui hong"
+        );
+
+        User doctorUser5 = createUserIfNotExists(
+                "doctor5@gmail.com",
+                "123456",
+                "Bac si Do Hoang Nam",
+                "0900000015",
+                Role.DOCTOR
+        );
+
+        createProfileIfNotExists(
+                doctorUser5,
+                Gender.MALE,
+                "Ha Noi"
+        );
+
+        createDoctorIfNotExists(
+                doctorUser5,
+                4,
+                "Thac si Bac si",
+                10,
+                "P206",
+                "Bac si chuyen khoa nhi"
+        );
     }
 
     private User createUserIfNotExists(
@@ -255,7 +391,14 @@ public class DataSeeder implements CommandLineRunner {
         userProfileRepository.save(profile);
     }
 
-    private void createDoctorIfNotExists(User doctorUser) {
+    private void createDoctorIfNotExists(
+            User doctorUser,
+            int specialtyIndex,
+            String degree,
+            Integer experienceYears,
+            String roomNumber,
+            String description
+    ) {
         if (doctorRepository.findByUserId(doctorUser.getId()).isPresent()) {
             return;
         }
@@ -263,10 +406,18 @@ public class DataSeeder implements CommandLineRunner {
         Specialty specialty = specialtyRepository.findByName("Nội tổng quát")
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy chuyên khoa Nội tổng quát"));
 
+        var specialties = specialtyRepository.findAll();
+        if (!specialties.isEmpty()) {
+            specialty = specialties.get(specialtyIndex % specialties.size());
+        }
+
         Doctor doctor = new Doctor();
         doctor.setUser(doctorUser);
         doctor.setSpecialty(specialty);
-        doctor.setExperienceYears(8);
+        doctor.setDegree(degree);
+        doctor.setExperienceYears(experienceYears);
+        doctor.setRoomNumber(roomNumber);
+        doctor.setDescription(description);
 
         doctorRepository.save(doctor);
     }
