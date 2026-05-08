@@ -19,25 +19,20 @@ public class Appointment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Bệnh nhân đặt lịch
     @ManyToOne
     @JoinColumn(name = "patient_id", nullable = false)
     private User patient;
 
-    // Bác sĩ được đặt lịch
     @ManyToOne
     @JoinColumn(name = "doctor_id", nullable = false)
     private Doctor doctor;
 
-    // Ngày khám
     @Column(name = "appointment_date", nullable = false)
     private LocalDate appointmentDate;
 
-    // Giờ bắt đầu
     @Column(name = "start_time", nullable = false)
     private LocalTime startTime;
 
-    // Giờ kết thúc
     @Column(name = "end_time", nullable = false)
     private LocalTime endTime;
 

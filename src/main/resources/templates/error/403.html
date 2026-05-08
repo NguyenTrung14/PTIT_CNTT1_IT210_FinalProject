@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -77,7 +77,11 @@
     </p>
 
     <div class="d-flex justify-content-center gap-2">
-        <a th:href="@{/auth/login}" class="btn btn-primary">
+        <a th:if="${showLogout}" th:href="${returnUrl}" class="btn btn-primary">
+            Quay lai
+        </a>
+
+        <a th:if="${!showLogout}" th:href="@{/auth/login}" class="btn btn-primary">
             Ve trang dang nhap
         </a>
 

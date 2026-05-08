@@ -6,6 +6,10 @@ import com.example.javaweb_congthongtinbenhvien.entity.enums.MedicineStatus;
 import com.example.javaweb_congthongtinbenhvien.repository.MedicineRepository;
 import com.example.javaweb_congthongtinbenhvien.service.MedicineService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +40,23 @@ public class MedicineServiceImpl implements MedicineService {
     }
 
     @Override
+    public Page<Medicine> search(String keyword, int page, int size) {
+        int safePage = Math.max(page, 0);
+        int safeSize = size <= 0 ? 5 : size;
+        Pageable pageable = PageRequest.of(safePage, safeSize, Sort.by("id").ascending());
+
+        if (keyword == null || keyword.isBlank()) {
+            return medicineRepository.findByStatus(MedicineStatus.ACTIVE, pageable);
+        }
+
+        return medicineRepository.findByNameContainingIgnoreCaseAndStatus(
+                keyword.trim(),
+                MedicineStatus.ACTIVE,
+                pageable
+        );
+    }
+
+    @Override
     public Medicine findById(Long id) {
         return medicineRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy thuốc"));
@@ -44,9 +65,10 @@ public class MedicineServiceImpl implements MedicineService {
     @Override
     @Transactional
     public void save(MedicineRequest request) {
+        normalizeMedicineRequest(request);
         validateMedicine(request);
 
-        Medicine medicine = medicineRepository.findByName(request.getName())
+        Medicine medicine = medicineRepository.findByNormalizedName(request.getName())
                 .map(existing -> {
                     if (existing.getStatus() == MedicineStatus.ACTIVE) {
                         throw new RuntimeException("Tên thuốc đã tồn tại");
@@ -69,11 +91,12 @@ public class MedicineServiceImpl implements MedicineService {
     @Override
     @Transactional
     public void update(Long id, MedicineRequest request) {
+        normalizeMedicineRequest(request);
         validateMedicine(request);
 
         Medicine medicine = findById(id);
 
-        medicineRepository.findByName(request.getName()).ifPresent(existing -> {
+        medicineRepository.findByNormalizedName(request.getName()).ifPresent(existing -> {
             if (!existing.getId().equals(id)) {
                 throw new RuntimeException("Tên thuốc đã tồn tại");
             }
@@ -95,6 +118,16 @@ public class MedicineServiceImpl implements MedicineService {
         Medicine medicine = findById(id);
         medicine.setStatus(MedicineStatus.DELETED);
         medicineRepository.save(medicine);
+    }
+
+    private void normalizeMedicineRequest(MedicineRequest request) {
+        if (request.getName() != null) {
+            request.setName(request.getName().trim());
+        }
+
+        if (request.getUnit() != null) {
+            request.setUnit(request.getUnit().trim());
+        }
     }
 
     private void validateMedicine(MedicineRequest request) {

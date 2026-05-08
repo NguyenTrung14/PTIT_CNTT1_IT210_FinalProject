@@ -39,7 +39,7 @@ public class DoctorController {
 
         model.addAttribute("loginUser", loginUser);
         model.addAttribute("doctor", doctor);
-        model.addAttribute("appointments", appointmentService.findByDoctorId(doctor.getId()));
+        model.addAttribute("appointments", appointmentService.findWaitingByDoctorId(doctor.getId()));
 
         return "doctor/dashboard";
     }

@@ -15,16 +15,7 @@ public interface MedicalRecordRepository extends JpaRepository<MedicalRecord, Lo
 
     List<MedicalRecord> findByDoctorIdOrderByCreatedAtDesc(Long doctorId);
 
-    /*
-     * Dùng cho CORE-07:
-     * Bệnh nhân xem lịch sử bệnh án đầy đủ:
-     * - Bác sĩ
-     * - Lịch khám
-     * - Đơn thuốc
-     * - Chi tiết thuốc
-     *
-     * Nếu không join fetch, view Thymeleaf dễ bị LazyInitializationException.
-     */
+    
     @Query("""
             select distinct mr
             from MedicalRecord mr

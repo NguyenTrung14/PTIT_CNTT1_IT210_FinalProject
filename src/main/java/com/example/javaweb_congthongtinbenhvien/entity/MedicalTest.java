@@ -26,22 +26,18 @@ public class MedicalTest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Thuộc bệnh án nào
     @ManyToOne
     @JoinColumn(name = "medical_record_id", nullable = false)
     private MedicalRecord medicalRecord;
 
-    // Loại xét nghiệm: Máu, X-quang, Siêu âm...
     @ManyToOne
     @JoinColumn(name = "test_type_id", nullable = false)
     private TestType testType;
 
-    // Bệnh nhân được chỉ định xét nghiệm
     @ManyToOne
     @JoinColumn(name = "patient_id", nullable = false)
     private User patient;
 
-    // Bác sĩ chỉ định xét nghiệm
     @ManyToOne
     @JoinColumn(name = "doctor_id", nullable = false)
     private Doctor doctor;
@@ -50,15 +46,12 @@ public class MedicalTest {
     @Column(nullable = false, length = 30)
     private MedicalTestStatus status = MedicalTestStatus.ORDERED;
 
-    // Lý do chỉ định xét nghiệm
     @Column(name = "test_reason", columnDefinition = "TEXT")
     private String testReason;
 
-    // Kết quả xét nghiệm
     @Column(name = "test_result", columnDefinition = "TEXT")
     private String testResult;
 
-    // Ghi chú của bác sĩ hoặc kỹ thuật viên
     @Column(columnDefinition = "TEXT")
     private String note;
 

@@ -14,17 +14,25 @@ import java.util.List;
 
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
 
-    List<Appointment> findByPatientId(Long patientId);
+    @Query(value = """
+            select *
+            from appointments a
+            where a.patient_id = :patientId
+            order by
+              a.appointment_date asc,
+              a.start_time asc
+            """, nativeQuery = true)
+    List<Appointment> findByPatientIdOrderByAppointmentTimeAsc(@Param("patientId") Long patientId);
 
-    List<Appointment> findByPatientIdOrderByAppointmentDateDescStartTimeDesc(Long patientId);
-
-    List<Appointment> findByPatientIdAndAppointmentDateAndStatusIn(
-            Long patientId,
-            LocalDate appointmentDate,
-            Collection<AppointmentStatus> statuses
-    );
-
-    List<Appointment> findByDoctorIdOrderByAppointmentDateAscStartTimeAsc(Long doctorId);
+    @Query(value = """
+            select *
+            from appointments a
+            where a.doctor_id = :doctorId
+            order by
+              a.appointment_date asc,
+              a.start_time asc
+            """, nativeQuery = true)
+    List<Appointment> findByDoctorIdOrderByAppointmentTimeAsc(@Param("doctorId") Long doctorId);
 
     List<Appointment> findByDoctorIdAndAppointmentDateOrderByStartTimeAsc(
             Long doctorId,
@@ -34,6 +42,20 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     List<Appointment> findByDoctorIdAndStatusOrderByAppointmentDateAscStartTimeAsc(
             Long doctorId,
             AppointmentStatus status
+    );
+
+    @Query(value = """
+            select *
+            from appointments a
+            where a.doctor_id = :doctorId
+              and a.status = :status
+            order by
+              a.appointment_date asc,
+              a.start_time asc
+            """, nativeQuery = true)
+    List<Appointment> findByDoctorIdAndStatusOrderByAppointmentTimeAsc(
+            @Param("doctorId") Long doctorId,
+            @Param("status") String status
     );
 
     List<Appointment> findByStatusOrderByAppointmentDateAscStartTimeAsc(AppointmentStatus status);
@@ -55,13 +77,34 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             @Param("statuses") Collection<AppointmentStatus> statuses
     );
 
+    @Query(value = """
+            select count(*)
+            from appointments a
+            where a.patient_id = :patientId
+              and a.appointment_date = :appointmentDate
+              and a.status in (:statuses)
+              and abs(timestampdiff(
+                    minute,
+                    timestamp(a.appointment_date, a.start_time),
+                    timestamp(:appointmentDate, :startTime)
+              )) < :gapMinutes
+            """, nativeQuery = true)
+    long countPatientScheduleConflicts(
+            @Param("patientId") Long patientId,
+            @Param("appointmentDate") LocalDate appointmentDate,
+            @Param("startTime") LocalTime startTime,
+            @Param("gapMinutes") Long gapMinutes,
+            @Param("statuses") Collection<String> statuses
+    );
+
     @Query("""
             select d.user.fullName, count(a.id)
             from Appointment a
             join a.doctor d
-            where a.status = com.example.javaweb_congthongtinbenhvien.entity.enums.AppointmentStatus.COMPLETED
+            where d.status = com.example.javaweb_congthongtinbenhvien.entity.enums.CommonStatus.ACTIVE
+              and a.status <> com.example.javaweb_congthongtinbenhvien.entity.enums.AppointmentStatus.CANCELLED
             group by d.id, d.user.fullName
-            order by count(a.id) desc
+            order by count(a.id) desc, d.user.fullName asc
             """)
-    List<Object[]> findTopDoctorsByCompletedAppointments(Pageable pageable);
+    List<Object[]> findTopDoctorsByAppointments(Pageable pageable);
 }

@@ -21,12 +21,10 @@ public class Doctor {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // User có role DOCTOR
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
-    // Bác sĩ thuộc 1 chuyên khoa
     @ManyToOne
     @JoinColumn(name = "specialty_id", nullable = false)
     private Specialty specialty;

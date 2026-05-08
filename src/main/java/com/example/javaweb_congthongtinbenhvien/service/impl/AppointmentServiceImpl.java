@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @Service
@@ -36,7 +37,12 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     @Transactional
     public Appointment bookAppointment(AppointmentRequest request) {
+        if (request.getStartTime() != null) {
+            request.setEndTime(request.getStartTime().plusMinutes(MIN_PATIENT_APPOINTMENT_GAP_MINUTES));
+        }
         validateAppointmentTime(request);
+        LocalTime endTime = request.getStartTime().plusMinutes(MIN_PATIENT_APPOINTMENT_GAP_MINUTES);
+        request.setEndTime(endTime);
 
         User patient = userRepository.findById(request.getPatientId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy bệnh nhân"));
@@ -58,7 +64,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                 AppointmentStatus.WAITING
         );
 
-        if (hasPatientScheduleConflict(request, activeStatuses)) {
+        if (hasPatientScheduleConflict(request, activeStatuses.stream().map(Enum::name).toList())) {
             throw new RuntimeException("Lich kham cua ban phai cach lich khac toi thieu 30 phut");
         }
 
@@ -66,7 +72,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                 request.getDoctorId(),
                 request.getAppointmentDate(),
                 request.getStartTime(),
-                request.getEndTime(),
+                endTime,
                 activeStatuses
         );
 
@@ -79,14 +85,10 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.setDoctor(doctor);
         appointment.setAppointmentDate(request.getAppointmentDate());
         appointment.setStartTime(request.getStartTime());
-        appointment.setEndTime(request.getEndTime());
+        appointment.setEndTime(endTime);
         appointment.setReason(request.getReason());
 
-        /*
-         * Theo SRS:
-         * Bệnh nhân đặt lịch xong thì lịch ở trạng thái chờ khám.
-         * Bác sĩ sẽ nhìn thấy lịch này ở màn hình /doctor/appointments.
-         */
+        
         appointment.setStatus(AppointmentStatus.PENDING);
 
         Appointment savedAppointment = appointmentRepository.save(appointment);
@@ -105,24 +107,19 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     public List<Appointment> findByPatientId(Long patientId) {
-        LocalDateTime now = LocalDateTime.now();
-
-        return appointmentRepository.findByPatientId(patientId)
-                .stream()
-                .sorted((left, right) -> compareByNearestAppointmentTime(left, right, now))
-                .toList();
+        return appointmentRepository.findByPatientIdOrderByAppointmentTimeAsc(patientId);
     }
 
     @Override
     public List<Appointment> findByDoctorId(Long doctorId) {
-        return appointmentRepository.findByDoctorIdOrderByAppointmentDateAscStartTimeAsc(doctorId);
+        return appointmentRepository.findByDoctorIdOrderByAppointmentTimeAsc(doctorId);
     }
 
     @Override
     public List<Appointment> findWaitingByDoctorId(Long doctorId) {
-        return appointmentRepository.findByDoctorIdAndStatusOrderByAppointmentDateAscStartTimeAsc(
+        return appointmentRepository.findByDoctorIdAndStatusOrderByAppointmentTimeAsc(
                 doctorId,
-                AppointmentStatus.WAITING
+                AppointmentStatus.WAITING.name()
         );
     }
 
@@ -185,11 +182,11 @@ public class AppointmentServiceImpl implements AppointmentService {
             throw new RuntimeException("Ngày khám không được để trống");
         }
 
-        if (request.getStartTime() == null || request.getEndTime() == null) {
+        if (request.getStartTime() == null) {
             throw new RuntimeException("Giờ khám không được để trống");
         }
 
-        if (!request.getStartTime().isBefore(request.getEndTime())) {
+        if (false) {
             throw new RuntimeException("Giờ bắt đầu phải nhỏ hơn giờ kết thúc");
         }
 
@@ -203,61 +200,13 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
     }
 
-    private static boolean isPastAppointment(Appointment appointment, LocalDateTime now) {
-        return appointmentDateTime(appointment).isBefore(now);
-    }
-
-    private static LocalDateTime appointmentDateTime(Appointment appointment) {
-        return LocalDateTime.of(appointment.getAppointmentDate(), appointment.getStartTime());
-    }
-
-    private boolean hasPatientScheduleConflict(
-            AppointmentRequest request,
-            List<AppointmentStatus> activeStatuses
-    ) {
-        LocalDateTime requestedStart = LocalDateTime.of(request.getAppointmentDate(), request.getStartTime());
-        LocalDateTime requestedEnd = LocalDateTime.of(request.getAppointmentDate(), request.getEndTime());
-
-        return appointmentRepository.findByPatientIdAndAppointmentDateAndStatusIn(
-                        request.getPatientId(),
-                        request.getAppointmentDate(),
-                        activeStatuses
-                )
-                .stream()
-                .anyMatch(existing -> {
-                    LocalDateTime existingStart = LocalDateTime.of(
-                            existing.getAppointmentDate(),
-                            existing.getStartTime()
-                    );
-                    LocalDateTime existingEnd = LocalDateTime.of(
-                            existing.getAppointmentDate(),
-                            existing.getEndTime()
-                    );
-
-                    return requestedStart.isBefore(existingEnd.plusMinutes(MIN_PATIENT_APPOINTMENT_GAP_MINUTES))
-                            && requestedEnd.plusMinutes(MIN_PATIENT_APPOINTMENT_GAP_MINUTES).isAfter(existingStart);
-                });
-    }
-
-    private static int compareByNearestAppointmentTime(
-            Appointment left,
-            Appointment right,
-            LocalDateTime now
-    ) {
-        boolean leftPast = isPastAppointment(left, now);
-        boolean rightPast = isPastAppointment(right, now);
-
-        if (leftPast != rightPast) {
-            return Boolean.compare(leftPast, rightPast);
-        }
-
-        LocalDateTime leftTime = appointmentDateTime(left);
-        LocalDateTime rightTime = appointmentDateTime(right);
-
-        if (leftPast) {
-            return rightTime.compareTo(leftTime);
-        }
-
-        return leftTime.compareTo(rightTime);
+    private boolean hasPatientScheduleConflict(AppointmentRequest request, List<String> activeStatuses) {
+        return appointmentRepository.countPatientScheduleConflicts(
+                request.getPatientId(),
+                request.getAppointmentDate(),
+                request.getStartTime(),
+                MIN_PATIENT_APPOINTMENT_GAP_MINUTES,
+                activeStatuses
+        ) > 0;
     }
 }

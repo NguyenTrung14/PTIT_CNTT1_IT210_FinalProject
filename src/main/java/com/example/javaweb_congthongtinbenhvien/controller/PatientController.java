@@ -93,9 +93,7 @@ public class PatientController {
         AppointmentRequest request = new AppointmentRequest();
         request.setPatientId(loginUser.getId());
 
-        model.addAttribute("appointment", request);
-        model.addAttribute("specialties", specialtyRepository.findByStatus(CommonStatus.ACTIVE));
-        model.addAttribute("doctors", doctorRepository.findByStatus(CommonStatus.ACTIVE));
+        populateBookAppointmentForm(model, request);
 
         return "patient/book-appointment";
     }
@@ -104,6 +102,7 @@ public class PatientController {
     public String bookAppointment(
             @ModelAttribute("appointment") AppointmentRequest request,
             HttpSession session,
+            Model model,
             RedirectAttributes redirectAttributes
     ) {
         try {
@@ -115,8 +114,9 @@ public class PatientController {
             redirectAttributes.addFlashAttribute("success", "Dat lich thanh cong. Vui long thanh toan de xac nhan lich kham.");
             return "redirect:/patient/payments/checkout/" + appointment.getId();
         } catch (RuntimeException e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
-            return "redirect:/patient/appointments/book";
+            model.addAttribute("error", e.getMessage());
+            populateBookAppointmentForm(model, request);
+            return "patient/book-appointment";
         }
     }
 
@@ -156,5 +156,11 @@ public class PatientController {
         model.addAttribute("records", medicalRecordService.findByPatientId(loginUser.getId()));
 
         return "patient/medical-history";
+    }
+
+    private void populateBookAppointmentForm(Model model, AppointmentRequest request) {
+        model.addAttribute("appointment", request);
+        model.addAttribute("specialties", specialtyRepository.findByStatus(CommonStatus.ACTIVE));
+        model.addAttribute("doctors", doctorRepository.findByStatus(CommonStatus.ACTIVE));
     }
 }

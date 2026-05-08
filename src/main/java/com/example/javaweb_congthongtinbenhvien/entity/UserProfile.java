@@ -18,7 +18,6 @@ public class UserProfile {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // CORE-03: mỗi user có 1 hồ sơ cá nhân
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;

@@ -25,11 +25,9 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // CORE-01: dùng để đăng nhập
     @Column(nullable = false, unique = true, length = 100)
     private String email;
 
-    // CORE-01: lưu mật khẩu đã hash, không lưu plain text
     @Column(nullable = false, length = 255)
     private String password;
 
@@ -39,7 +37,6 @@ public class User {
     @Column(unique = true, length = 20)
     private String phone;
 
-    // CORE-02: ADMIN / DOCTOR / PATIENT
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private Role role;
@@ -54,11 +51,9 @@ public class User {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    // CORE-03: hồ sơ cá nhân
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private UserProfile profile;
 
-    // User có role DOCTOR sẽ có thông tin Doctor
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Doctor doctor;
 

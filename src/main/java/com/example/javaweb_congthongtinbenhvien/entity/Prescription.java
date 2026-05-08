@@ -25,12 +25,10 @@ public class Prescription {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Một bệnh án có một đơn thuốc
     @OneToOne
     @JoinColumn(name = "medical_record_id", nullable = false, unique = true)
     private MedicalRecord medicalRecord;
 
-    // CORE-08: sau khi kê đơn -> chờ cấp phát
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     private PrescriptionStatus status = PrescriptionStatus.WAITING_DISPENSE;
@@ -41,12 +39,10 @@ public class Prescription {
     @Column(name = "dispensed_at")
     private LocalDateTime dispensedAt;
 
-    // Admin hoặc bác sĩ xác nhận phát thuốc
     @ManyToOne
     @JoinColumn(name = "dispensed_by")
     private User dispensedBy;
 
-    // Một đơn thuốc có nhiều chi tiết thuốc
     @OneToMany(mappedBy = "prescription", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PrescriptionDetail> details = new ArrayList<>();
 

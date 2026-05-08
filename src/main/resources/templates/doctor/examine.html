@@ -1,8 +1,8 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Khám bệnh</title>
+    <title>Kh�m b?nh</title>
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -15,35 +15,35 @@
 
 <div class="container py-4">
 
-    <h3 class="mb-4">Khám bệnh và kê đơn</h3>
+    <h3 class="mb-4">Kh�m b?nh v� k� don</h3>
 
     <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
     <div class="card mb-4 shadow-sm">
         <div class="card-header bg-white">
-            <strong>Thông tin lịch khám</strong>
+            <strong>Th�ng tin l?ch kh�m</strong>
         </div>
 
         <div class="card-body">
             <p>
-                <strong>Bệnh nhân:</strong>
+                <strong>B?nh nh�n:</strong>
                 <span th:text="${appointment.patient.fullName}"></span>
             </p>
 
             <p>
-                <strong>Ngày khám:</strong>
+                <strong>Ng�y kh�m:</strong>
                 <span th:text="${#temporals.format(appointment.appointmentDate, 'dd/MM/yyyy')}"></span>
             </p>
 
             <p>
-                <strong>Giờ khám:</strong>
+                <strong>Gi? kh�m:</strong>
                 <span th:text="${appointment.startTime}"></span>
                 -
                 <span th:text="${appointment.endTime}"></span>
             </p>
 
             <p>
-                <strong>Lý do khám:</strong>
+                <strong>L� do kh�m:</strong>
                 <span th:text="${appointment.reason}"></span>
             </p>
         </div>
@@ -55,12 +55,12 @@
 
         <div class="card mb-4 shadow-sm">
             <div class="card-header bg-white">
-                <strong>Kết quả khám</strong>
+                <strong>K?t qu? kh�m</strong>
             </div>
 
             <div class="card-body">
                 <div class="mb-3">
-                    <label class="form-label">Triệu chứng</label>
+                    <label class="form-label">Tri?u ch?ng</label>
                     <textarea class="form-control"
                               th:field="*{symptoms}"
                               rows="3"
@@ -68,7 +68,7 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Chẩn đoán</label>
+                    <label class="form-label">Ch?n do�n</label>
                     <textarea class="form-control"
                               th:field="*{diagnosis}"
                               rows="3"
@@ -76,14 +76,14 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Phác đồ điều trị</label>
+                    <label class="form-label">Ph�c d? di?u tr?</label>
                     <textarea class="form-control"
                               th:field="*{treatmentPlan}"
                               rows="3"></textarea>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Ghi chú</label>
+                    <label class="form-label">Ghi ch�</label>
                     <textarea class="form-control"
                               th:field="*{note}"
                               rows="2"></textarea>
@@ -93,135 +93,101 @@
 
         <div class="card mb-4 shadow-sm">
             <div class="card-header bg-white">
-                <strong>Kê đơn thuốc</strong>
+                <strong>K� don thu?c</strong>
             </div>
 
             <div class="card-body">
 
                 <p class="text-muted">
-                    Nhập tối thiểu 1 dòng thuốc. Dòng nào không chọn thuốc sẽ được bỏ qua.
+                    Kh�ng b?t bu?c k� thu?c. B?m Th�m thu?c n?u b?nh nh�n c?n d�ng thu?c di?u tr?.
                 </p>
 
-                <div class="row g-2 mb-3">
-                    <div class="col-md-3">
-                        <label class="form-label">Thuốc 1</label>
-                        <select class="form-select" name="prescriptionDetails[0].medicineId">
-                            <option value="">-- Chọn thuốc --</option>
-                            <option th:each="medicine : ${medicines}"
-                                    th:value="${medicine.id}"
-                                    th:text="${medicine.name + ' - tồn: ' + medicine.stockQuantity}">
-                            </option>
-                        </select>
-                    </div>
+                <div id="prescriptionRows"></div>
 
-                    <div class="col-md-2">
-                        <label class="form-label">Số lượng</label>
-                        <input type="number"
-                               class="form-control"
-                               name="prescriptionDetails[0].quantity"
-                               min="1">
-                    </div>
-
-                    <div class="col-md-3">
-                        <label class="form-label">Liều dùng</label>
-                        <input type="text"
-                               class="form-control"
-                               name="prescriptionDetails[0].dosage"
-                               placeholder="VD: 2 viên/ngày">
-                    </div>
-
-                    <div class="col-md-4">
-                        <label class="form-label">Hướng dẫn</label>
-                        <input type="text"
-                               class="form-control"
-                               name="prescriptionDetails[0].usageInstruction"
-                               placeholder="VD: Uống sau ăn">
-                    </div>
-                </div>
-
-                <div class="row g-2 mb-3">
-                    <div class="col-md-3">
-                        <label class="form-label">Thuốc 2</label>
-                        <select class="form-select" name="prescriptionDetails[1].medicineId">
-                            <option value="">-- Chọn thuốc --</option>
-                            <option th:each="medicine : ${medicines}"
-                                    th:value="${medicine.id}"
-                                    th:text="${medicine.name + ' - tồn: ' + medicine.stockQuantity}">
-                            </option>
-                        </select>
-                    </div>
-
-                    <div class="col-md-2">
-                        <label class="form-label">Số lượng</label>
-                        <input type="number"
-                               class="form-control"
-                               name="prescriptionDetails[1].quantity"
-                               min="1">
-                    </div>
-
-                    <div class="col-md-3">
-                        <label class="form-label">Liều dùng</label>
-                        <input type="text"
-                               class="form-control"
-                               name="prescriptionDetails[1].dosage">
-                    </div>
-
-                    <div class="col-md-4">
-                        <label class="form-label">Hướng dẫn</label>
-                        <input type="text"
-                               class="form-control"
-                               name="prescriptionDetails[1].usageInstruction">
-                    </div>
-                </div>
-
-                <div class="row g-2 mb-3">
-                    <div class="col-md-3">
-                        <label class="form-label">Thuốc 3</label>
-                        <select class="form-select" name="prescriptionDetails[2].medicineId">
-                            <option value="">-- Chọn thuốc --</option>
-                            <option th:each="medicine : ${medicines}"
-                                    th:value="${medicine.id}"
-                                    th:text="${medicine.name + ' - tồn: ' + medicine.stockQuantity}">
-                            </option>
-                        </select>
-                    </div>
-
-                    <div class="col-md-2">
-                        <label class="form-label">Số lượng</label>
-                        <input type="number"
-                               class="form-control"
-                               name="prescriptionDetails[2].quantity"
-                               min="1">
-                    </div>
-
-                    <div class="col-md-3">
-                        <label class="form-label">Liều dùng</label>
-                        <input type="text"
-                               class="form-control"
-                               name="prescriptionDetails[2].dosage">
-                    </div>
-
-                    <div class="col-md-4">
-                        <label class="form-label">Hướng dẫn</label>
-                        <input type="text"
-                               class="form-control"
-                               name="prescriptionDetails[2].usageInstruction">
-                    </div>
-                </div>
+                <button type="button" class="btn btn-outline-primary btn-sm" id="addMedicineBtn">
+                    Th�m thu?c
+                </button>
 
             </div>
         </div>
 
         <button type="submit" class="btn btn-success">
-            Lưu kết quả khám
+            Luu k?t qu? kh�m
         </button>
 
         <a th:href="@{/doctor/appointments}" class="btn btn-secondary">
-            Hủy
+            H?y
         </a>
     </form>
 
 </div>
+
+<template id="medicineRowTemplate">
+    <div class="row g-2 mb-3 prescription-row">
+        <div class="col-md-3">
+            <label class="form-label medicine-label">Thu?c</label>
+            <select class="form-select medicine-select">
+                <option value="">-- Ch?n thu?c --</option>
+                <option th:each="medicine : ${medicines}"
+                        th:value="${medicine.id}"
+                        th:text="${medicine.name + ' - t?n: ' + medicine.stockQuantity}">
+                </option>
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <label class="form-label">S? lu?ng</label>
+            <input type="number" class="form-control quantity-input" min="1" value="1">
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">Li?u d�ng</label>
+            <input type="text" class="form-control dosage-input" placeholder="VD: 2 vi�n/ng�y">
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">Hu?ng d?n</label>
+            <input type="text" class="form-control instruction-input" placeholder="VD: U?ng sau an">
+        </div>
+
+        <div class="col-md-1 d-flex align-items-end">
+            <button type="button" class="btn btn-outline-danger w-100 remove-medicine-btn">
+                X�a
+            </button>
+        </div>
+    </div>
+</template>
+
+<script>
+    const prescriptionRows = document.getElementById('prescriptionRows');
+    const addMedicineBtn = document.getElementById('addMedicineBtn');
+    const medicineRowTemplate = document.getElementById('medicineRowTemplate');
+
+    function refreshPrescriptionRowNames() {
+        prescriptionRows.querySelectorAll('.prescription-row').forEach((row, index) => {
+            row.querySelector('.medicine-label').textContent = `Thu?c ${index + 1}`;
+            row.querySelector('.medicine-select').name = `prescriptionDetails[${index}].medicineId`;
+            row.querySelector('.quantity-input').name = `prescriptionDetails[${index}].quantity`;
+            row.querySelector('.dosage-input').name = `prescriptionDetails[${index}].dosage`;
+            row.querySelector('.instruction-input').name = `prescriptionDetails[${index}].usageInstruction`;
+        });
+    }
+
+    addMedicineBtn.addEventListener('click', () => {
+        const row = medicineRowTemplate.content.cloneNode(true);
+        prescriptionRows.appendChild(row);
+        refreshPrescriptionRowNames();
+    });
+
+    prescriptionRows.addEventListener('click', event => {
+        if (!event.target.classList.contains('remove-medicine-btn')) {
+            return;
+        }
+
+        event.target.closest('.prescription-row').remove();
+        refreshPrescriptionRowNames();
+    });
+</script>
 
 </body>
 </html>

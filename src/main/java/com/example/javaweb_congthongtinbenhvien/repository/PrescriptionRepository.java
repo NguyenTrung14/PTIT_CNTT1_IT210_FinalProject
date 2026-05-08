@@ -14,10 +14,7 @@ public interface PrescriptionRepository extends JpaRepository<Prescription, Long
 
     List<Prescription> findByStatusOrderByCreatedAtAsc(PrescriptionStatus status);
 
-    /*
-     * Dùng cho màn hình cấp phát thuốc:
-     * load đủ bệnh án, bệnh nhân, bác sĩ, thuốc để tránh LazyInitializationException.
-     */
+    
     @Query("""
             select distinct p
             from Prescription p
@@ -32,9 +29,7 @@ public interface PrescriptionRepository extends JpaRepository<Prescription, Long
             """)
     List<Prescription> findFullByStatusOrderByCreatedAtAsc(PrescriptionStatus status);
 
-    /*
-     * Dùng cho trang chi tiết đơn thuốc.
-     */
+    
     @Query("""
             select distinct p
             from Prescription p

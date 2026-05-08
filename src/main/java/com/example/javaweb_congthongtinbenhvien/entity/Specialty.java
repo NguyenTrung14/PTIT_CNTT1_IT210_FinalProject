@@ -15,7 +15,6 @@ public class Specialty {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Ví dụ: Tim mạch, Da liễu, Nhi khoa
     @Column(nullable = false, unique = true, length = 100)
     private String name;
 

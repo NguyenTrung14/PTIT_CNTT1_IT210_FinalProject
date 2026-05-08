@@ -44,8 +44,12 @@ public class AuthServiceImpl implements AuthService {
             return null;
         }
 
+        if (user.getStatus() == UserStatus.LOCKED) {
+            throw new RuntimeException("Tai khoan cua ban da bi khoa");
+        }
+
         if (user.getStatus() != UserStatus.ACTIVE) {
-            return null;
+            throw new RuntimeException("Tai khoan cua ban khong hoat dong");
         }
 
         boolean matched = passwordEncoder.matches(password, user.getPassword());

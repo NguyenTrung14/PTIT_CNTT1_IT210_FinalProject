@@ -47,10 +47,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
             throw new RuntimeException("Lịch khám đã bị hủy");
         }
 
-        /*
-         * Theo SRS CORE-06:
-         * Bác sĩ chỉ tiếp nhận ca khám đang ở trạng thái "Chờ khám".
-         */
+        
         if (appointment.getStatus() != AppointmentStatus.WAITING) {
             throw new RuntimeException("Chỉ được khám lịch đang ở trạng thái chờ khám");
         }
@@ -67,10 +64,6 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
             throw new RuntimeException("Chẩn đoán không được để trống");
         }
 
-        if (request.getPrescriptionDetails() == null || request.getPrescriptionDetails().isEmpty()) {
-            throw new RuntimeException("Đơn thuốc phải có ít nhất 1 loại thuốc");
-        }
-
         MedicalRecord medicalRecord = new MedicalRecord();
         medicalRecord.setAppointment(appointment);
         medicalRecord.setPatient(appointment.getPatient());
@@ -82,12 +75,21 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
 
         MedicalRecord savedRecord = medicalRecordRepository.save(medicalRecord);
 
-        Prescription prescription = new Prescription();
-        prescription.setMedicalRecord(savedRecord);
-        prescription.setStatus(PrescriptionStatus.WAITING_DISPENSE);
+        List<PrescriptionDetailRequest> validDetails = request.getPrescriptionDetails() == null
+                ? List.of()
+                : request.getPrescriptionDetails()
+                .stream()
+                .filter(detail -> detail != null && detail.getMedicineId() != null)
+                .toList();
 
-        for (PrescriptionDetailRequest detailRequest : request.getPrescriptionDetails()) {
-            if (detailRequest.getMedicineId() == null) {
+        if (!validDetails.isEmpty()) {
+            Prescription prescription = new Prescription();
+            prescription.setMedicalRecord(savedRecord);
+            prescription.setStatus(PrescriptionStatus.WAITING_DISPENSE);
+            savedRecord.setPrescription(prescription);
+
+            for (PrescriptionDetailRequest detailRequest : validDetails) {
+                if (detailRequest.getMedicineId() == null) {
                 throw new RuntimeException("Thuốc không được để trống");
             }
 
@@ -99,16 +101,16 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy thuốc"));
 
             PrescriptionDetail detail = new PrescriptionDetail();
-            detail.setPrescription(prescription);
             detail.setMedicine(medicine);
             detail.setQuantity(detailRequest.getQuantity());
             detail.setDosage(detailRequest.getDosage());
             detail.setUsageInstruction(detailRequest.getUsageInstruction());
 
-            prescription.getDetails().add(detail);
+            prescription.addDetail(detail);
         }
 
-        prescriptionRepository.save(prescription);
+            prescriptionRepository.save(prescription);
+        }
 
         appointment.setStatus(AppointmentStatus.COMPLETED);
         appointmentRepository.save(appointment);

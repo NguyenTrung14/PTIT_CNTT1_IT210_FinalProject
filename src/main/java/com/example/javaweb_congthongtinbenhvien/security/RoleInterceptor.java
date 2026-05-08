@@ -36,20 +36,52 @@ public class RoleInterceptor implements HandlerInterceptor {
         Role role = loginUser.getRole();
 
         if (uri.startsWith("/admin") && role != Role.ADMIN) {
+            saveAccessDeniedReturnUrl(request, session, role);
             response.sendRedirect(request.getContextPath() + "/error/403");
             return false;
         }
 
         if (uri.startsWith("/doctor") && role != Role.DOCTOR) {
+            saveAccessDeniedReturnUrl(request, session, role);
             response.sendRedirect(request.getContextPath() + "/error/403");
             return false;
         }
 
         if (uri.startsWith("/patient") && role != Role.PATIENT) {
+            saveAccessDeniedReturnUrl(request, session, role);
             response.sendRedirect(request.getContextPath() + "/error/403");
             return false;
         }
 
         return true;
+    }
+
+    private void saveAccessDeniedReturnUrl(HttpServletRequest request, HttpSession session, Role role) {
+        String referer = request.getHeader("Referer");
+        String contextPath = request.getContextPath();
+        String baseUrl = request.getScheme() + "://" + request.getServerName();
+
+        if (request.getServerPort() != 80 && request.getServerPort() != 443) {
+            baseUrl += ":" + request.getServerPort();
+        }
+
+        if (referer != null && referer.startsWith(baseUrl) && !referer.contains("/error/403")) {
+            session.setAttribute("accessDeniedReturnUrl", referer);
+            return;
+        }
+
+        session.setAttribute("accessDeniedReturnUrl", contextPath + dashboardPath(role));
+    }
+
+    private String dashboardPath(Role role) {
+        if (role == Role.ADMIN) {
+            return "/admin/dashboard";
+        }
+
+        if (role == Role.DOCTOR) {
+            return "/doctor/dashboard";
+        }
+
+        return "/patient/dashboard";
     }
 }

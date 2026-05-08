@@ -24,18 +24,15 @@ public class Medicine {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // CORE-04: Admin CRUD danh mục thuốc
     @Column(nullable = false, unique = true, length = 150)
     private String name;
 
-    // Ví dụ: viên, chai, gói, hộp
     @Column(nullable = false, length = 50)
     private String unit;
 
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal price = BigDecimal.ZERO;
 
-    // CORE-08: quản lý tồn kho thuốc
     @Column(name = "stock_quantity", nullable = false)
     private Integer stockQuantity = 0;
 

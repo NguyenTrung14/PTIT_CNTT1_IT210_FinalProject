@@ -1,11 +1,10 @@
 package com.example.javaweb_congthongtinbenhvien.service.impl;
 
-import com.example.javaweb_congthongtinbenhvien.entity.Medicine;
 import com.example.javaweb_congthongtinbenhvien.entity.Prescription;
-import com.example.javaweb_congthongtinbenhvien.entity.PrescriptionDetail;
 import com.example.javaweb_congthongtinbenhvien.entity.User;
 import com.example.javaweb_congthongtinbenhvien.entity.enums.PrescriptionStatus;
 import com.example.javaweb_congthongtinbenhvien.repository.MedicineRepository;
+import com.example.javaweb_congthongtinbenhvien.repository.PrescriptionDetailRepository;
 import com.example.javaweb_congthongtinbenhvien.repository.PrescriptionRepository;
 import com.example.javaweb_congthongtinbenhvien.repository.UserRepository;
 import com.example.javaweb_congthongtinbenhvien.service.PrescriptionService;
@@ -22,6 +21,7 @@ public class PrescriptionServiceImpl implements PrescriptionService {
 
     private final PrescriptionRepository prescriptionRepository;
     private final MedicineRepository medicineRepository;
+    private final PrescriptionDetailRepository prescriptionDetailRepository;
     private final UserRepository userRepository;
 
     @Override
@@ -46,41 +46,19 @@ public class PrescriptionServiceImpl implements PrescriptionService {
             throw new RuntimeException("Chỉ được cấp phát đơn thuốc đang chờ cấp phát");
         }
 
-        if (prescription.getDetails() == null || prescription.getDetails().isEmpty()) {
-            throw new RuntimeException("Đơn thuốc không có thuốc");
+        if (!prescriptionDetailRepository.existsByPrescriptionId(prescriptionId)) {
+            throw new RuntimeException("Don thuoc khong co thuoc");
         }
 
         User dispensedBy = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy người cấp phát"));
 
-        /*
-         * Bước 1: kiểm tra toàn bộ tồn kho trước.
-         * Nếu 1 thuốc không đủ, chặn toàn bộ quá trình.
-         */
-        for (PrescriptionDetail detail : prescription.getDetails()) {
-            Medicine medicine = detail.getMedicine();
+        prescriptionDetailRepository.findFirstInvalidOrInsufficientStockMedicineName(prescriptionId)
+                .ifPresent(medicineName -> {
+                    throw new RuntimeException("Thuoc " + medicineName + " khong du ton kho hoac so luong khong hop le");
+                });
 
-            if (medicine == null) {
-                throw new RuntimeException("Chi tiết đơn thuốc không hợp lệ");
-            }
-
-            if (detail.getQuantity() == null || detail.getQuantity() <= 0) {
-                throw new RuntimeException("Số lượng thuốc không hợp lệ");
-            }
-
-            if (medicine.getStockQuantity() == null || medicine.getStockQuantity() < detail.getQuantity()) {
-                throw new RuntimeException("Thuốc " + medicine.getName() + " không đủ tồn kho");
-            }
-        }
-
-        /*
-         * Bước 2: sau khi tất cả thuốc đều đủ, mới trừ kho.
-         */
-        for (PrescriptionDetail detail : prescription.getDetails()) {
-            Medicine medicine = detail.getMedicine();
-            medicine.setStockQuantity(medicine.getStockQuantity() - detail.getQuantity());
-            medicineRepository.save(medicine);
-        }
+        medicineRepository.deductStockByPrescriptionId(prescriptionId);
 
         prescription.setStatus(PrescriptionStatus.DISPENSED);
         prescription.setDispensedAt(LocalDateTime.now());

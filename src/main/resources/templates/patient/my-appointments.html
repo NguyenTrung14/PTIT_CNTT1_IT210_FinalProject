@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -35,7 +35,6 @@
             <table class="table table-bordered table-hover align-middle">
                 <thead class="table-light">
                 <tr>
-                    <th>ID</th>
                     <th>Bac si</th>
                     <th>Chuyen khoa</th>
                     <th>Ngay kham</th>
@@ -55,7 +54,6 @@
                 </tr>
 
                 <tr th:each="appointment : ${appointments}">
-                    <td th:text="${appointment.id}">1</td>
                     <td th:text="${appointment.doctor.user.fullName}">Bac si</td>
                     <td th:text="${appointment.doctor.specialty.name}">Chuyen khoa</td>
                     <td th:text="${#temporals.format(appointment.appointmentDate, 'dd/MM/yyyy')}">01/01/2026</td>

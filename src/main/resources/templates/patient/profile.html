@@ -1,8 +1,8 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Hồ sơ bệnh nhân</title>
+    <title>H? so b?nh nh�n</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -15,7 +15,7 @@
 
 <div class="container py-4">
 
-    <h3 class="mb-3">Hồ sơ cá nhân</h3>
+    <h3 class="mb-3">H? so c� nh�n</h3>
 
     <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
     <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
@@ -28,36 +28,36 @@
                 <input type="hidden" th:field="*{userId}">
 
                 <div class="mb-3">
-                    <label class="form-label">Họ tên</label>
+                    <label class="form-label">H? t�n</label>
                     <input type="text" class="form-control" th:field="*{fullName}" required>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Số điện thoại</label>
+                    <label class="form-label">S? di?n tho?i</label>
                     <input type="text" class="form-control" th:field="*{phone}">
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Giới tính</label>
+                    <label class="form-label">Gi?i t�nh</label>
                     <select class="form-select" th:field="*{gender}">
-                        <option value="">-- Chọn giới tính --</option>
+                        <option value="">-- Ch?n gi?i t�nh --</option>
                         <option value="MALE">Nam</option>
-                        <option value="FEMALE">Nữ</option>
-                        <option value="OTHER">Khác</option>
+                        <option value="FEMALE">N?</option>
+                        <option value="OTHER">Kh�c</option>
                     </select>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Địa chỉ</label>
+                    <label class="form-label">�?a ch?</label>
                     <textarea class="form-control" th:field="*{address}" rows="3"></textarea>
                 </div>
 
                 <button type="submit" class="btn btn-primary">
-                    Cập nhật hồ sơ
+                    C?p nh?t h? so
                 </button>
 
                 <a th:href="@{/patient/dashboard}" class="btn btn-secondary">
-                    Quay lại
+                    Quay l?i
                 </a>
             </form>
 

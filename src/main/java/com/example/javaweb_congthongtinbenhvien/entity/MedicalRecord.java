@@ -24,17 +24,14 @@ public class MedicalRecord {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Mỗi lịch khám hoàn thành có đúng 1 bệnh án
     @OneToOne
     @JoinColumn(name = "appointment_id", nullable = false, unique = true)
     private Appointment appointment;
 
-    // Lưu trực tiếp patient để tra cứu lịch sử nhanh
     @ManyToOne
     @JoinColumn(name = "patient_id", nullable = false)
     private User patient;
 
-    // Bác sĩ khám
     @ManyToOne
     @JoinColumn(name = "doctor_id", nullable = false)
     private Doctor doctor;
@@ -54,7 +51,6 @@ public class MedicalRecord {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    // Một bệnh án có một đơn thuốc
     @OneToOne(mappedBy = "medicalRecord", cascade = CascadeType.ALL)
     private Prescription prescription;
 

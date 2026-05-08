@@ -4,6 +4,7 @@ import com.example.javaweb_congthongtinbenhvien.dto.MedicineRequest;
 import com.example.javaweb_congthongtinbenhvien.entity.Medicine;
 import com.example.javaweb_congthongtinbenhvien.service.MedicineService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -19,10 +20,15 @@ public class MedicineController {
     @GetMapping
     public String list(
             @RequestParam(defaultValue = "") String keyword,
+            @RequestParam(defaultValue = "0") int page,
             Model model
     ) {
-        model.addAttribute("medicines", medicineService.search(keyword));
+        Page<Medicine> medicinePage = medicineService.search(keyword, page, 5);
+
+        model.addAttribute("medicinePage", medicinePage);
+        model.addAttribute("medicines", medicinePage.getContent());
         model.addAttribute("keyword", keyword);
+        model.addAttribute("currentPage", page);
         return "admin/medicines/list";
     }
 
@@ -35,6 +41,7 @@ public class MedicineController {
     @PostMapping("/save")
     public String save(
             @ModelAttribute("medicine") MedicineRequest request,
+            Model model,
             RedirectAttributes redirectAttributes
     ) {
         try {
@@ -42,8 +49,9 @@ public class MedicineController {
             redirectAttributes.addFlashAttribute("success", "Thêm thuốc thành công");
             return "redirect:/admin/medicines";
         } catch (RuntimeException e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
-            return "redirect:/admin/medicines/add";
+            model.addAttribute("error", e.getMessage());
+            model.addAttribute("medicine", request);
+            return "admin/medicines/form";
         }
     }
 
@@ -71,6 +79,7 @@ public class MedicineController {
     public String update(
             @PathVariable Long id,
             @ModelAttribute("medicine") MedicineRequest request,
+            Model model,
             RedirectAttributes redirectAttributes
     ) {
         try {
@@ -79,8 +88,10 @@ public class MedicineController {
             redirectAttributes.addFlashAttribute("success", "Cập nhật thuốc thành công");
             return "redirect:/admin/medicines";
         } catch (RuntimeException e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
-            return "redirect:/admin/medicines/edit/" + id;
+            request.setId(id);
+            model.addAttribute("error", e.getMessage());
+            model.addAttribute("medicine", request);
+            return "admin/medicines/form";
         }
     }
 

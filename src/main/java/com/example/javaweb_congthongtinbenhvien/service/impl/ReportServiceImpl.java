@@ -29,6 +29,6 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public List<Object[]> topDoctors() {
-        return appointmentRepository.findTopDoctorsByCompletedAppointments(PageRequest.of(0, 5));
+        return appointmentRepository.findTopDoctorsByAppointments(PageRequest.of(0, 5));
     }
 }

@@ -1,5 +1,6 @@
 package com.example.javaweb_congthongtinbenhvien.controller;
 
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,6 +12,7 @@ public class ErrorController {
     @GetMapping("/error/403")
     public String forbidden(
             @RequestParam(defaultValue = "false") boolean loginRequired,
+            HttpSession session,
             Model model
     ) {
         if (loginRequired) {
@@ -23,6 +25,8 @@ public class ErrorController {
             model.addAttribute("title", "Bạn không có quyền truy cập");
             model.addAttribute("message", "Tài khoản hiện tại không được phép truy cập trang này. Vui lòng quay lại đúng trang chức năng của bạn.");
             model.addAttribute("showLogout", true);
+            Object returnUrl = session.getAttribute("accessDeniedReturnUrl");
+            model.addAttribute("returnUrl", returnUrl == null ? "/auth/login" : returnUrl);
         }
 
         return "error/403";

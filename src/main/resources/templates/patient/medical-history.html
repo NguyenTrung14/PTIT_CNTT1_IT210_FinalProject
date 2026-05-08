@@ -1,8 +1,8 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Lịch sử bệnh án</title>
+    <title>L?ch s? b?nh �n</title>
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -15,17 +15,17 @@
 
 <div class="container py-4">
 
-    <h3 class="mb-4">Lịch sử hồ sơ y tế</h3>
+    <h3 class="mb-4">L?ch s? h? so y t?</h3>
 
     <div th:if="${#lists.isEmpty(records)}" class="alert alert-info">
-        Bạn chưa có hồ sơ bệnh án nào.
+        B?n chua c� h? so b?nh �n n�o.
     </div>
 
     <div th:each="record : ${records}" class="card mb-4 shadow-sm">
         <div class="card-header bg-white">
             <div class="d-flex justify-content-between">
                 <strong>
-                    Lần khám #
+                    L?n kh�m #
                     <span th:text="${record.id}"></span>
                 </strong>
 
@@ -37,77 +37,78 @@
 
         <div class="card-body">
             <p>
-                <strong>Bác sĩ:</strong>
+                <strong>B�c si:</strong>
                 <span th:text="${record.doctor.user.fullName}"></span>
             </p>
 
             <p>
-                <strong>Ngày khám:</strong>
+                <strong>Ng�y kh�m:</strong>
                 <span th:text="${#temporals.format(record.appointment.appointmentDate, 'dd/MM/yyyy')}"></span>
                 -
                 <span th:text="${record.appointment.startTime}"></span>
-                đến
+                d?n
                 <span th:text="${record.appointment.endTime}"></span>
             </p>
 
             <p>
-                <strong>Triệu chứng:</strong>
+                <strong>Tri?u ch?ng:</strong>
                 <span th:text="${record.symptoms}"></span>
             </p>
 
             <p>
-                <strong>Chẩn đoán:</strong>
+                <strong>Ch?n do�n:</strong>
                 <span th:text="${record.diagnosis}"></span>
             </p>
 
             <p th:if="${record.treatmentPlan != null and !record.treatmentPlan.isBlank()}">
-                <strong>Phác đồ điều trị:</strong>
+                <strong>Ph�c d? di?u tr?:</strong>
                 <span th:text="${record.treatmentPlan}"></span>
             </p>
 
             <p th:if="${record.note != null and !record.note.isBlank()}">
-                <strong>Ghi chú:</strong>
+                <strong>Ghi ch�:</strong>
                 <span th:text="${record.note}"></span>
             </p>
 
-            <h6 class="mt-4">Danh sách thuốc đã kê</h6>
+            <h6 class="mt-4">Danh s�ch thu?c d� k�</h6>
 
             <table class="table table-bordered table-sm align-middle">
                 <thead class="table-light">
                 <tr>
-                    <th>Tên thuốc</th>
-                    <th>Số lượng</th>
-                    <th>Liều dùng</th>
-                    <th>Hướng dẫn sử dụng</th>
-                    <th>Trạng thái đơn</th>
+                    <th>T�n thu?c</th>
+                    <th>S? lu?ng</th>
+                    <th>Li?u d�ng</th>
+                    <th>Hu?ng d?n s? d?ng</th>
+                    <th>Tr?ng th�i don</th>
                 </tr>
                 </thead>
 
                 <tbody>
                 <tr th:if="${record.prescription == null or #lists.isEmpty(record.prescription.details)}">
                     <td colspan="5" class="text-center text-muted">
-                        Không có thuốc được kê.
+                        Kh�ng c� thu?c du?c k�.
                     </td>
                 </tr>
 
-                <tr th:each="detail : ${record.prescription.details}"
-                    th:if="${record.prescription != null}">
-                    <td th:text="${detail.medicine.name}"></td>
-                    <td th:text="${detail.quantity}"></td>
-                    <td th:text="${detail.dosage}"></td>
-                    <td th:text="${detail.usageInstruction}"></td>
-                    <td>
-                        <span class="badge bg-warning text-dark"
-                              th:if="${record.prescription.status.name() == 'WAITING_DISPENSE'}">
-                            Chờ cấp phát
-                        </span>
+                <th:block th:if="${record.prescription != null}">
+                    <tr th:each="detail : ${record.prescription.details}">
+                        <td th:text="${detail.medicine.name}"></td>
+                        <td th:text="${detail.quantity}"></td>
+                        <td th:text="${detail.dosage}"></td>
+                        <td th:text="${detail.usageInstruction}"></td>
+                        <td>
+                            <span class="badge bg-warning text-dark"
+                                  th:if="${record.prescription.status.name() == 'WAITING_DISPENSE'}">
+                                Ch? c?p ph�t
+                            </span>
 
-                        <span class="badge bg-success"
-                              th:if="${record.prescription.status.name() == 'DISPENSED'}">
-                            Đã phát thuốc
-                        </span>
-                    </td>
-                </tr>
+                            <span class="badge bg-success"
+                                  th:if="${record.prescription.status.name() == 'DISPENSED'}">
+                                �� ph�t thu?c
+                            </span>
+                        </td>
+                    </tr>
+                </th:block>
                 </tbody>
             </table>
         </div>

@@ -27,13 +27,10 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Người thanh toán, thường là bệnh nhân
     @ManyToOne
     @JoinColumn(name = "patient_id", nullable = false)
     private User patient;
 
-    // Thanh toán cho lịch khám nào
-    // OneToOne để mỗi lịch khám chỉ có 1 giao dịch chính
     @OneToOne
     @JoinColumn(name = "appointment_id", nullable = false, unique = true)
     private Appointment appointment;
@@ -49,15 +46,12 @@ public class Payment {
     @Column(nullable = false, length = 30)
     private PaymentStatus status = PaymentStatus.PENDING;
 
-    // Mã giao dịch nội bộ hoặc mã từ VNPay/Momo
     @Column(name = "transaction_code", unique = true, length = 100)
     private String transactionCode;
 
-    // Nội dung thanh toán
     @Column(length = 255)
     private String description;
 
-    // Lý do thất bại hoặc ghi chú hoàn tiền
     @Column(name = "failure_reason", columnDefinition = "TEXT")
     private String failureReason;
 

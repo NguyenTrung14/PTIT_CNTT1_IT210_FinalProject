@@ -17,7 +17,6 @@ public class TestType {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Ví dụ: Xét nghiệm máu, X-quang, Siêu âm
     @Column(nullable = false, unique = true, length = 100)
     private String name;
 
