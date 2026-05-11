@@ -61,6 +61,22 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     List<Appointment> findByStatusOrderByAppointmentDateAscStartTimeAsc(AppointmentStatus status);
 
     @Query("""
+            select a
+            from Appointment a
+            left join fetch a.payment
+            where a.status in :statuses
+              and (
+                    a.appointmentDate < :currentDate
+                    or (a.appointmentDate = :currentDate and a.endTime < :currentTime)
+              )
+            """)
+    List<Appointment> findOverdueAppointments(
+            @Param("currentDate") LocalDate currentDate,
+            @Param("currentTime") LocalTime currentTime,
+            @Param("statuses") Collection<AppointmentStatus> statuses
+    );
+
+    @Query("""
     select count(a) > 0
     from Appointment a
     where a.doctor.id = :doctorId

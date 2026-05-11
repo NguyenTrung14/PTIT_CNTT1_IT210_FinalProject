@@ -2,7 +2,7 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>L?ch kh·m c?a b·c si</title>
+    <title>L·ªãch kh√°m c·ªßa b√°c sƒ©</title>
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -15,7 +15,7 @@
 
 <div class="container py-4">
 
-    <h3 class="mb-3">Danh s·ch l?ch kh·m</h3>
+    <h3 class="mb-3">Danh s√°ch l·ªãch kh√°m</h3>
 
     <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
     <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
@@ -26,19 +26,19 @@
             <table class="table table-bordered table-hover align-middle">
                 <thead class="table-light">
                 <tr>
-                    <th>B?nh nh‚n</th>
-                    <th>Ng‡y kh·m</th>
-                    <th>Gi?</th>
-                    <th>L˝ do kh·m</th>
-                    <th>Tr?ng th·i</th>
-                    <th>Thao t·c</th>
+                    <th>B·ªánh nh√¢n</th>
+                    <th>Ng√†y kh√°m</th>
+                    <th>Gi·ªù</th>
+                    <th>L√Ω do kh√°m</th>
+                    <th>Tr·∫°ng th√°i</th>
+                    <th>Thao t√°c</th>
                 </tr>
                 </thead>
 
                 <tbody>
                 <tr th:if="${#lists.isEmpty(appointments)}">
-                    <td colspan="7" class="text-center text-muted">
-                        Chua cÛ l?ch kh·m.
+                    <td colspan="6" class="text-center text-muted">
+                        Ch∆∞a c√≥ l·ªãch kh√°m.
                     </td>
                 </tr>
 
@@ -59,23 +59,29 @@
                     <td>
                         <span class="badge bg-warning text-dark"
                               th:if="${appointment.status.name() == 'WAITING'}">
-                            Ch? kh·m
+                            Ch·ªù kh√°m
                         </span>
 
                         <span class="badge bg-success"
                               th:if="${appointment.status.name() == 'COMPLETED'}">
-                            –„ ho‡n th‡nh
+                            ƒê√£ ho√†n th√†nh
                         </span>
 
                         <span class="badge bg-danger"
                               th:if="${appointment.status.name() == 'CANCELLED'}">
-                            –„ h?y
+                            ƒê√£ h·ªßy
+                        </span>
+
+                        <span class="badge bg-danger"
+                              th:if="${appointment.status.name() == 'REJECTED'}">
+                            Da tu choi
                         </span>
 
                         <span class="badge bg-secondary"
                               th:if="${appointment.status.name() != 'WAITING'
                                       and appointment.status.name() != 'COMPLETED'
-                                      and appointment.status.name() != 'CANCELLED'}"
+                                      and appointment.status.name() != 'CANCELLED'
+                                      and appointment.status.name() != 'REJECTED'}"
                               th:text="${appointment.status}">
                         </span>
                     </td>
@@ -84,12 +90,12 @@
                         <a th:if="${appointment.status.name() == 'WAITING'}"
                            th:href="@{/doctor/examine/{id}(id=${appointment.id})}"
                            class="btn btn-primary btn-sm">
-                            Kh·m b?nh
+                            Kh√°m b·ªánh
                         </a>
 
                         <span th:if="${appointment.status.name() != 'WAITING'}"
                               class="text-muted">
-                            KhÙng kh? d?ng
+                            Kh√¥ng kh·∫£ d·ª•ng
                         </span>
                     </td>
                 </tr>

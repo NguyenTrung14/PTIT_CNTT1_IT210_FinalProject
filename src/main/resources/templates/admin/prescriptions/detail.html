@@ -2,7 +2,7 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Chi ti?t don thu?c</title>
+    <title>Chi tiết đơn thuốc</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -15,45 +15,61 @@
 
 <div class="container py-4">
 
-    <h3>Chi ti?t don thu?c</h3>
+    <h3>Chi tiết đơn thuốc</h3>
 
     <div class="row g-3 mb-4">
 
         <div class="col-md-6">
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-white">
-                    <strong>Th�ng tin b?nh �n</strong>
+                    <strong>Thông tin bệnh án</strong>
                 </div>
 
                 <div class="card-body">
                     <p>
-                        <strong>B?nh nh�n:</strong>
-                        <span th:text="${prescription.medicalRecord.patient.fullName}">B?nh nh�n</span>
+                        <strong>Bệnh nhân:</strong>
+                        <span th:text="${prescription.medicalRecord.patient.fullName}">Bệnh nhân</span>
                     </p>
 
                     <p>
-                        <strong>B�c si:</strong>
-                        <span th:text="${prescription.medicalRecord.doctor.user.fullName}">B�c si</span>
+                        <strong>Bác sĩ:</strong>
+                        <span th:text="${prescription.medicalRecord.doctor.user.fullName}">Bác sĩ</span>
                     </p>
 
                     <p>
-                        <strong>Tri?u ch?ng:</strong>
-                        <span th:text="${prescription.medicalRecord.symptoms}">Tri?u ch?ng</span>
+                        <strong>Ngày khám:</strong>
+                        <span th:text="${#temporals.format(prescription.medicalRecord.appointment.appointmentDate, 'dd/MM/yyyy')}">
+                            01/01/2026
+                        </span>
+                        -
+                        <span th:text="${prescription.medicalRecord.appointment.startTime}">08:00</span>
+                        đến
+                        <span th:text="${prescription.medicalRecord.appointment.endTime}">08:30</span>
+                    </p>
+
+                    <p th:if="${prescription.medicalRecord.appointment.reason != null and !prescription.medicalRecord.appointment.reason.isBlank()}">
+                        <strong>Lý do khám:</strong>
+                        <span th:text="${prescription.medicalRecord.appointment.reason}">Lý do khám</span>
                     </p>
 
                     <p>
-                        <strong>Ch?n do�n:</strong>
-                        <span th:text="${prescription.medicalRecord.diagnosis}">Ch?n do�n</span>
+                        <strong>Triệu chứng:</strong>
+                        <span th:text="${prescription.medicalRecord.symptoms}">Triệu chứng</span>
                     </p>
 
                     <p>
-                        <strong>Ph�c d?:</strong>
-                        <span th:text="${prescription.medicalRecord.treatmentPlan}">Ph�c d?</span>
+                        <strong>Chẩn đoán:</strong>
+                        <span th:text="${prescription.medicalRecord.diagnosis}">Chẩn đoán</span>
                     </p>
 
                     <p>
-                        <strong>Ghi ch�:</strong>
-                        <span th:text="${prescription.medicalRecord.note}">Ghi ch�</span>
+                        <strong>Phác đồ:</strong>
+                        <span th:text="${prescription.medicalRecord.treatmentPlan}">Phác đồ</span>
+                    </p>
+
+                    <p>
+                        <strong>Ghi chú:</strong>
+                        <span th:text="${prescription.medicalRecord.note}">Ghi chú</span>
                     </p>
                 </div>
             </div>
@@ -62,43 +78,43 @@
         <div class="col-md-6">
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-white">
-                    <strong>Th�ng tin c?p ph�t</strong>
+                    <strong>Thông tin cấp phát</strong>
                 </div>
 
                 <div class="card-body">
                     <p>
-                        <strong>M� don:</strong>
+                        <strong>Mã đơn:</strong>
                         <span th:text="${prescription.id}">1</span>
                     </p>
 
                     <p>
-                        <strong>Ng�y t?o:</strong>
+                        <strong>Ngày tạo:</strong>
                         <span th:text="${#temporals.format(prescription.createdAt, 'dd/MM/yyyy HH:mm')}">
                             01/01/2026
                         </span>
                     </p>
 
                     <p>
-                        <strong>Tr?ng th�i:</strong>
+                        <strong>Trạng thái:</strong>
 
                         <span class="badge bg-warning text-dark"
                               th:if="${prescription.status.name() == 'WAITING_DISPENSE'}">
-                            Ch? c?p ph�t
+                            Chờ cấp phát
                         </span>
 
                         <span class="badge bg-success"
                               th:if="${prescription.status.name() == 'DISPENSED'}">
-                            �� ph�t
+                            Đã phát
                         </span>
                     </p>
 
                     <p th:if="${prescription.dispensedAt != null}">
-                        <strong>Th?i gian ph�t:</strong>
+                        <strong>Thời gian phát:</strong>
                         <span th:text="${#temporals.format(prescription.dispensedAt, 'dd/MM/yyyy HH:mm')}"></span>
                     </p>
 
                     <p th:if="${prescription.dispensedBy != null}">
-                        <strong>Ngu?i ph�t:</strong>
+                        <strong>Người phát:</strong>
                         <span th:text="${prescription.dispensedBy.fullName}"></span>
                     </p>
                 </div>
@@ -109,26 +125,26 @@
 
     <div class="card shadow-sm border-0">
         <div class="card-header bg-white">
-            <strong>Danh s�ch thu?c</strong>
+            <strong>Danh sách thuốc</strong>
         </div>
 
         <div class="card-body">
             <table class="table table-bordered table-hover align-middle">
                 <thead class="table-light">
                 <tr>
-                    <th>T�n thu?c</th>
-                    <th>S? lu?ng k�</th>
-                    <th>T?n kho hi?n t?i</th>
-                    <th>Li?u d�ng</th>
-                    <th>Hu?ng d?n</th>
-                    <th>Ki?m tra t?n</th>
+                    <th>Tên thuốc</th>
+                    <th>Số lượng kê</th>
+                    <th>Tồn kho hiện tại</th>
+                    <th>Liều dùng</th>
+                    <th>Hướng dẫn</th>
+                    <th>Kiểm tra tồn</th>
                 </tr>
                 </thead>
 
                 <tbody>
                 <tr th:if="${#lists.isEmpty(prescription.details)}">
                     <td colspan="6" class="text-center text-muted">
-                        �on thu?c chua c� chi ti?t.
+                        Đơn thuốc chưa có chi tiết.
                     </td>
                 </tr>
 
@@ -139,19 +155,19 @@
 
                     <td th:text="${detail.medicine.stockQuantity}">100</td>
 
-                    <td th:text="${detail.dosage}">2 vi�n/ng�y</td>
+                    <td th:text="${detail.dosage}">2 viên/ngày</td>
 
-                    <td th:text="${detail.usageInstruction}">Sau an</td>
+                    <td th:text="${detail.usageInstruction}">Sau ăn</td>
 
                     <td>
                         <span class="badge bg-success"
                               th:if="${detail.medicine.stockQuantity >= detail.quantity}">
-                            �? t?n
+                            Đủ tồn
                         </span>
 
                         <span class="badge bg-danger"
                               th:if="${detail.medicine.stockQuantity < detail.quantity}">
-                            Kh�ng d? t?n
+                            Không đủ tồn
                         </span>
                     </td>
                 </tr>
@@ -161,12 +177,12 @@
             <a th:if="${prescription.status.name() == 'WAITING_DISPENSE'}"
                th:href="@{${basePath + '/prescriptions/dispense/' + prescription.id}}"
                class="btn btn-success"
-               onclick="return confirm('X�c nh?n c?p ph�t thu?c v� tr? t?n kho?')">
-                X�c nh?n ph�t thu?c
+               onclick="return confirm('Xác nhận cấp phát thuốc và trừ tồn kho?')">
+                Xác nhận phát thuốc
             </a>
 
             <a th:href="@{${basePath + '/prescriptions/waiting'}}" class="btn btn-secondary">
-                Quay l?i
+                Quay lại
             </a>
         </div>
     </div>

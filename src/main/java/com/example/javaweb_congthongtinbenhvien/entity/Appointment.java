@@ -37,7 +37,7 @@ public class Appointment {
     private LocalTime endTime;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 30, columnDefinition = "varchar(30)")
     private AppointmentStatus status = AppointmentStatus.WAITING;
 
     @Column(columnDefinition = "text")

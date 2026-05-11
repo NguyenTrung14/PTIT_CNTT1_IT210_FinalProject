@@ -137,6 +137,7 @@ public class DoctorController {
     public String examine(
             @ModelAttribute("medicalRecord") MedicalRecordRequest request,
             HttpSession session,
+            Model model,
             RedirectAttributes redirectAttributes
     ) {
         try {
@@ -157,13 +158,26 @@ public class DoctorController {
             redirectAttributes.addFlashAttribute("success", "Lưu kết quả khám thành công");
             return "redirect:/doctor/appointments";
         } catch (RuntimeException e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
-
             if (request.getAppointmentId() == null) {
+                redirectAttributes.addFlashAttribute("error", e.getMessage());
                 return "redirect:/doctor/appointments";
             }
 
-            return "redirect:/doctor/examine/" + request.getAppointmentId();
+            User loginUser = getLoginUser(session);
+            Doctor doctor = getDoctorByLoginUser(loginUser);
+            Appointment appointment = appointmentService.findById(request.getAppointmentId());
+
+            if (!appointment.getDoctor().getId().equals(doctor.getId())) {
+                redirectAttributes.addFlashAttribute("error", e.getMessage());
+                return "redirect:/doctor/appointments";
+            }
+
+            model.addAttribute("error", e.getMessage());
+            model.addAttribute("appointment", appointment);
+            model.addAttribute("medicalRecord", request);
+            model.addAttribute("medicines", medicineService.findAllActive());
+
+            return "doctor/examine";
         }
     }
 

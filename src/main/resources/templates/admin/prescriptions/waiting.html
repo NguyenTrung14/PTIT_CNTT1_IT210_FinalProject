@@ -2,7 +2,7 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>–on thu?c ch? c?p ph·t</title>
+    <title>ƒê∆°n thu·ªëc ch·ªù c·∫•p ph√°t</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -15,8 +15,11 @@
 
 <div class="container py-4">
 
-    <h3>–on thu?c ch? c?p ph·t</h3>
-    <p class="text-muted">Ki?m tra t?n kho v‡ x·c nh?n ph·t thu?c cho b?nh nh‚n.</p>
+    <h3 th:text="${pageTitle}">Don thuoc</h3>
+    <p class="text-muted"
+       th:text="${basePath == '/doctor' ? 'Xem lai tat ca don thuoc da ke va thong tin lan kham.' : 'Kiem tra ton kho va xac nhan phat thuoc cho benh nhan.'}">
+        Kiem tra ton kho va xac nhan phat thuoc cho benh nhan.
+    </p>
 
     <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
     <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
@@ -28,31 +31,31 @@
                 <thead class="table-light">
                 <tr>
                     <th>ID</th>
-                    <th>B?nh nh‚n</th>
-                    <th>B·c si kÍ don</th>
-                    <th>Ch?n do·n</th>
-                    <th>S? lo?i thu?c</th>
-                    <th>Ng‡y t?o</th>
-                    <th>Tr?ng th·i</th>
-                    <th>Thao t·c</th>
+                    <th>B·ªánh nh√¢n</th>
+                    <th>B√°c sƒ© k√™ ƒë∆°n</th>
+                    <th>Ch·∫©n ƒëo√°n</th>
+                    <th>S·ªë lo·∫°i thu·ªëc</th>
+                    <th>Ng√†y t·∫°o</th>
+                    <th>Tr·∫°ng th√°i</th>
+                    <th>Thao t√°c</th>
                 </tr>
                 </thead>
 
                 <tbody>
                 <tr th:if="${#lists.isEmpty(prescriptions)}">
                     <td colspan="8" class="text-center text-muted">
-                        KhÙng cÛ don thu?c n‡o dang ch? c?p ph·t.
+                        <span th:text="${emptyMessage}">Khong co don thuoc.</span>
                     </td>
                 </tr>
 
                 <tr th:each="prescription : ${prescriptions}">
                     <td th:text="${prescription.id}">1</td>
 
-                    <td th:text="${prescription.medicalRecord.patient.fullName}">B?nh nh‚n</td>
+                    <td th:text="${prescription.medicalRecord.patient.fullName}">B·ªánh nh√¢n</td>
 
-                    <td th:text="${prescription.medicalRecord.doctor.user.fullName}">B·c si</td>
+                    <td th:text="${prescription.medicalRecord.doctor.user.fullName}">B√°c sƒ©</td>
 
-                    <td th:text="${prescription.medicalRecord.diagnosis}">Ch?n do·n</td>
+                    <td th:text="${prescription.medicalRecord.diagnosis}">Ch·∫©n ƒëo√°n</td>
 
                     <td th:text="${#lists.size(prescription.details)}">0</td>
 
@@ -63,26 +66,26 @@
                     <td>
                         <span class="badge bg-warning text-dark"
                               th:if="${prescription.status.name() == 'WAITING_DISPENSE'}">
-                            Ch? c?p ph·t
+                            Ch·ªù c·∫•p ph√°t
                         </span>
 
                         <span class="badge bg-success"
                               th:if="${prescription.status.name() == 'DISPENSED'}">
-                            –„ ph·t
+                            ƒê√£ ph√°t
                         </span>
                     </td>
 
                     <td>
                         <a th:href="@{${basePath + '/prescriptions/detail/' + prescription.id}}"
                            class="btn btn-primary btn-sm">
-                            Chi ti?t
+                            Chi ti·∫øt
                         </a>
 
                         <a th:if="${prescription.status.name() == 'WAITING_DISPENSE'}"
                            th:href="@{${basePath + '/prescriptions/dispense/' + prescription.id}}"
                            class="btn btn-success btn-sm"
-                           onclick="return confirm('X·c nh?n c?p ph·t thu?c v‡ tr? t?n kho?')">
-                            X·c nh?n ph·t
+                           onclick="return confirm('X√°c nh·∫≠n c·∫•p ph√°t thu·ªëc v√† tr·ª´ t·ªìn kho?')">
+                            X√°c nh·∫≠n ph√°t
                         </a>
                     </td>
                 </tr>

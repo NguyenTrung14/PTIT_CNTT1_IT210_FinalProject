@@ -12,6 +12,15 @@ public interface PrescriptionDetailRepository extends JpaRepository<Prescription
 
     List<PrescriptionDetail> findByPrescriptionId(Long prescriptionId);
 
+    @Query("""
+            select pd
+            from PrescriptionDetail pd
+            left join fetch pd.medicine
+            where pd.prescription.id = :prescriptionId
+            order by pd.id asc
+            """)
+    List<PrescriptionDetail> findFullByPrescriptionId(Long prescriptionId);
+
     List<PrescriptionDetail> findByMedicineId(Long medicineId);
 
     boolean existsByPrescriptionId(Long prescriptionId);

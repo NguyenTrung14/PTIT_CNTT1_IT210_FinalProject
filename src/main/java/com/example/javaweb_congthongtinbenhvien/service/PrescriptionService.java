@@ -8,7 +8,11 @@ public interface PrescriptionService {
 
     List<Prescription> findWaitingDispense();
 
+    List<Prescription> findByDoctorUserId(Long doctorUserId);
+
     Prescription findById(Long id);
+
+    Prescription findByIdForDoctor(Long id, Long doctorUserId);
 
     void dispensePrescription(Long prescriptionId, Long userId);
 }

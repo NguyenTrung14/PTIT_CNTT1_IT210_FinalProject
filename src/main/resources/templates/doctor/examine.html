@@ -2,7 +2,7 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Kh�m b?nh</title>
+    <title>Khám bệnh</title>
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -15,35 +15,35 @@
 
 <div class="container py-4">
 
-    <h3 class="mb-4">Kh�m b?nh v� k� don</h3>
+    <h3 class="mb-4">Khám bệnh và kê đơn</h3>
 
     <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
     <div class="card mb-4 shadow-sm">
         <div class="card-header bg-white">
-            <strong>Th�ng tin l?ch kh�m</strong>
+            <strong>Thông tin lịch khám</strong>
         </div>
 
         <div class="card-body">
             <p>
-                <strong>B?nh nh�n:</strong>
+                <strong>Bệnh nhân:</strong>
                 <span th:text="${appointment.patient.fullName}"></span>
             </p>
 
             <p>
-                <strong>Ng�y kh�m:</strong>
+                <strong>Ngày khám:</strong>
                 <span th:text="${#temporals.format(appointment.appointmentDate, 'dd/MM/yyyy')}"></span>
             </p>
 
             <p>
-                <strong>Gi? kh�m:</strong>
+                <strong>Giờ khám:</strong>
                 <span th:text="${appointment.startTime}"></span>
                 -
                 <span th:text="${appointment.endTime}"></span>
             </p>
 
             <p>
-                <strong>L� do kh�m:</strong>
+                <strong>Lý do khám:</strong>
                 <span th:text="${appointment.reason}"></span>
             </p>
         </div>
@@ -55,12 +55,12 @@
 
         <div class="card mb-4 shadow-sm">
             <div class="card-header bg-white">
-                <strong>K?t qu? kh�m</strong>
+                <strong>Kết quả khám</strong>
             </div>
 
             <div class="card-body">
                 <div class="mb-3">
-                    <label class="form-label">Tri?u ch?ng</label>
+                    <label class="form-label">Triệu chứng</label>
                     <textarea class="form-control"
                               th:field="*{symptoms}"
                               rows="3"
@@ -68,7 +68,7 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Ch?n do�n</label>
+                    <label class="form-label">Chẩn đoán</label>
                     <textarea class="form-control"
                               th:field="*{diagnosis}"
                               rows="3"
@@ -76,14 +76,14 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Ph�c d? di?u tr?</label>
+                    <label class="form-label">Phác đồ điều trị</label>
                     <textarea class="form-control"
                               th:field="*{treatmentPlan}"
                               rows="3"></textarea>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Ghi ch�</label>
+                    <label class="form-label">Ghi chú</label>
                     <textarea class="form-control"
                               th:field="*{note}"
                               rows="2"></textarea>
@@ -93,30 +93,80 @@
 
         <div class="card mb-4 shadow-sm">
             <div class="card-header bg-white">
-                <strong>K� don thu?c</strong>
+                <strong>Kê đơn thuốc</strong>
             </div>
 
             <div class="card-body">
 
                 <p class="text-muted">
-                    Kh�ng b?t bu?c k� thu?c. B?m Th�m thu?c n?u b?nh nh�n c?n d�ng thu?c di?u tr?.
+                    Không bắt buộc kê thuốc. Bấm Thêm thuốc nếu bệnh nhân cần dùng thuốc điều trị.
                 </p>
 
-                <div id="prescriptionRows"></div>
+                <div id="prescriptionRows">
+                    <div class="row g-2 mb-3 prescription-row"
+                         th:each="detail, iterStat : *{prescriptionDetails}">
+                        <div class="col-md-3">
+                            <label class="form-label medicine-label"
+                                   th:text="${'Thuoc ' + (iterStat.index + 1)}">Thuoc</label>
+                            <select class="form-select medicine-select"
+                                    th:name="${'prescriptionDetails[' + iterStat.index + '].medicineId'}">
+                                <option value="">-- Chon thuoc --</option>
+                                <option th:each="medicine : ${medicines}"
+                                        th:value="${medicine.id}"
+                                        th:selected="${medicine.id == detail.medicineId}"
+                                        th:text="${medicine.name + ' - ton: ' + medicine.stockQuantity}">
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="form-label">So luong</label>
+                            <input type="number"
+                                   class="form-control quantity-input"
+                                   min="1"
+                                   th:name="${'prescriptionDetails[' + iterStat.index + '].quantity'}"
+                                   th:value="${detail.quantity}">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Lieu dung</label>
+                            <input type="text"
+                                   class="form-control dosage-input"
+                                   th:name="${'prescriptionDetails[' + iterStat.index + '].dosage'}"
+                                   th:value="${detail.dosage}"
+                                   placeholder="VD: 2 vien/ngay">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Huong dan</label>
+                            <input type="text"
+                                   class="form-control instruction-input"
+                                   th:name="${'prescriptionDetails[' + iterStat.index + '].usageInstruction'}"
+                                   th:value="${detail.usageInstruction}"
+                                   placeholder="VD: Uong sau an">
+                        </div>
+
+                        <div class="col-md-1 d-flex align-items-end">
+                            <button type="button" class="btn btn-outline-danger w-100 remove-medicine-btn">
+                                Xoa
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
                 <button type="button" class="btn btn-outline-primary btn-sm" id="addMedicineBtn">
-                    Th�m thu?c
+                    Thêm thuốc
                 </button>
 
             </div>
         </div>
 
         <button type="submit" class="btn btn-success">
-            Luu k?t qu? kh�m
+            Lưu kết quả khám
         </button>
 
         <a th:href="@{/doctor/appointments}" class="btn btn-secondary">
-            H?y
+            Hủy
         </a>
     </form>
 
@@ -125,34 +175,34 @@
 <template id="medicineRowTemplate">
     <div class="row g-2 mb-3 prescription-row">
         <div class="col-md-3">
-            <label class="form-label medicine-label">Thu?c</label>
+            <label class="form-label medicine-label">Thuốc</label>
             <select class="form-select medicine-select">
-                <option value="">-- Ch?n thu?c --</option>
+                <option value="">-- Chọn thuốc --</option>
                 <option th:each="medicine : ${medicines}"
                         th:value="${medicine.id}"
-                        th:text="${medicine.name + ' - t?n: ' + medicine.stockQuantity}">
+                        th:text="${medicine.name + ' - tồn: ' + medicine.stockQuantity}">
                 </option>
             </select>
         </div>
 
         <div class="col-md-2">
-            <label class="form-label">S? lu?ng</label>
+            <label class="form-label">Số lượng</label>
             <input type="number" class="form-control quantity-input" min="1" value="1">
         </div>
 
         <div class="col-md-3">
-            <label class="form-label">Li?u d�ng</label>
-            <input type="text" class="form-control dosage-input" placeholder="VD: 2 vi�n/ng�y">
+            <label class="form-label">Liều dùng</label>
+            <input type="text" class="form-control dosage-input" placeholder="VD: 2 viên/ngày">
         </div>
 
         <div class="col-md-3">
-            <label class="form-label">Hu?ng d?n</label>
-            <input type="text" class="form-control instruction-input" placeholder="VD: U?ng sau an">
+            <label class="form-label">Hướng dẫn</label>
+            <input type="text" class="form-control instruction-input" placeholder="VD: Uống sau ăn">
         </div>
 
         <div class="col-md-1 d-flex align-items-end">
             <button type="button" class="btn btn-outline-danger w-100 remove-medicine-btn">
-                X�a
+                Xóa
             </button>
         </div>
     </div>
@@ -162,10 +212,11 @@
     const prescriptionRows = document.getElementById('prescriptionRows');
     const addMedicineBtn = document.getElementById('addMedicineBtn');
     const medicineRowTemplate = document.getElementById('medicineRowTemplate');
+    const examinationForm = prescriptionRows.closest('form');
 
     function refreshPrescriptionRowNames() {
         prescriptionRows.querySelectorAll('.prescription-row').forEach((row, index) => {
-            row.querySelector('.medicine-label').textContent = `Thu?c ${index + 1}`;
+            row.querySelector('.medicine-label').textContent = `Thuốc ${index + 1}`;
             row.querySelector('.medicine-select').name = `prescriptionDetails[${index}].medicineId`;
             row.querySelector('.quantity-input').name = `prescriptionDetails[${index}].quantity`;
             row.querySelector('.dosage-input').name = `prescriptionDetails[${index}].dosage`;
@@ -187,6 +238,26 @@
         event.target.closest('.prescription-row').remove();
         refreshPrescriptionRowNames();
     });
+
+    examinationForm.addEventListener('submit', event => {
+        const selectedMedicineIds = new Set();
+
+        for (const select of prescriptionRows.querySelectorAll('.medicine-select')) {
+            if (!select.value) {
+                continue;
+            }
+
+            if (selectedMedicineIds.has(select.value)) {
+                event.preventDefault();
+                alert('Thuoc bi trung da ke trong don');
+                return;
+            }
+
+            selectedMedicineIds.add(select.value);
+        }
+    });
+
+    refreshPrescriptionRowNames();
 </script>
 
 </body>

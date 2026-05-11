@@ -2,7 +2,7 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard b?nh nh�n</title>
+    <title>Dashboard bệnh nhân</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -17,19 +17,19 @@
 
     <div class="mb-4">
         <h3>
-            Xin ch�o,
-            <span th:text="${loginUser.fullName}">B?nh nh�n</span>
+            Xin chào,
+            <span th:text="${loginUser.fullName}">Bệnh nhân</span>
         </h3>
-        <p class="text-muted mb-0">B?n c� th? d?t l?ch kh�m, h?y l?ch v� xem l?i h? so b?nh �n t?i d�y.</p>
+        <p class="text-muted mb-0">Bạn có thể đặt lịch khám, hủy lịch và xem lại hồ sơ bệnh án tại đây.</p>
     </div>
 
     <div class="row g-3 mb-4">
         <div class="col-md-4">
             <div class="card shadow-sm border-0">
                 <div class="card-body">
-                    <h6 class="text-muted">T?ng l?ch kh�m</h6>
+                    <h6 class="text-muted">Tổng lịch khám</h6>
                     <h2 th:text="${#lists.size(appointments)}">0</h2>
-                    <a th:href="@{/patient/appointments}" class="btn btn-primary btn-sm">Xem l?ch</a>
+                    <a th:href="@{/patient/appointments}" class="btn btn-primary btn-sm">Xem lịch</a>
                 </div>
             </div>
         </div>
@@ -37,9 +37,9 @@
         <div class="col-md-4">
             <div class="card shadow-sm border-0">
                 <div class="card-body">
-                    <h6 class="text-muted">�?t l?ch m?i</h6>
-                    <p class="mb-2">Ch?n chuy�n khoa, b�c si, ng�y v� gi? kh�m.</p>
-                    <a th:href="@{/patient/appointments/book}" class="btn btn-success btn-sm">�?t l?ch ngay</a>
+                    <h6 class="text-muted">Đặt lịch mới</h6>
+                    <p class="mb-2">Chọn chuyên khoa, bác sĩ, ngày và giờ khám.</p>
+                    <a th:href="@{/patient/appointments/book}" class="btn btn-success btn-sm">Đặt lịch ngay</a>
                 </div>
             </div>
         </div>
@@ -47,9 +47,9 @@
         <div class="col-md-4">
             <div class="card shadow-sm border-0">
                 <div class="card-body">
-                    <h6 class="text-muted">H? so y t?</h6>
-                    <p class="mb-2">Xem l?i ch?n do�n v� thu?c d� k�.</p>
-                    <a th:href="@{/patient/medical-history}" class="btn btn-warning btn-sm">Xem b?nh �n</a>
+                    <h6 class="text-muted">Hồ sơ y tế</h6>
+                    <p class="mb-2">Xem lại chẩn đoán và thuốc đã kê.</p>
+                    <a th:href="@{/patient/medical-history}" class="btn btn-warning btn-sm">Xem bệnh án</a>
                 </div>
             </div>
         </div>
@@ -57,29 +57,29 @@
 
     <div class="card shadow-sm border-0">
         <div class="card-header bg-white">
-            <strong>L?ch kh�m g?n d�y</strong>
+            <strong>Lịch khám gần đây</strong>
         </div>
 
         <div class="card-body">
             <table class="table table-bordered table-hover align-middle">
                 <thead class="table-light">
                 <tr>
-                    <th>B�c si</th>
-                    <th>Chuy�n khoa</th>
-                    <th>Ng�y kh�m</th>
-                    <th>Gi?</th>
-                    <th>Tr?ng th�i</th>
+                    <th>Bác sĩ</th>
+                    <th>Chuyên khoa</th>
+                    <th>Ngày khám</th>
+                    <th>Giờ</th>
+                    <th>Trạng thái</th>
                 </tr>
                 </thead>
 
                 <tbody>
                 <tr th:if="${#lists.isEmpty(appointments)}">
-                    <td colspan="5" class="text-center text-muted">B?n chua c� l?ch kh�m n�o.</td>
+                    <td colspan="5" class="text-center text-muted">Bạn chưa có lịch khám nào.</td>
                 </tr>
 
                 <tr th:each="appointment : ${appointments}">
-                    <td th:text="${appointment.doctor.user.fullName}">T�n b�c si</td>
-                    <td th:text="${appointment.doctor.specialty.name}">Chuy�n khoa</td>
+                    <td th:text="${appointment.doctor.user.fullName}">Tên bác sĩ</td>
+                    <td th:text="${appointment.doctor.specialty.name}">Chuyên khoa</td>
                     <td th:text="${#temporals.format(appointment.appointmentDate, 'dd/MM/yyyy')}">01/01/2026</td>
                     <td>
                         <span th:text="${appointment.startTime}">08:00</span>
@@ -87,9 +87,9 @@
                         <span th:text="${appointment.endTime}">08:30</span>
                     </td>
                     <td>
-                        <span class="badge bg-warning text-dark" th:if="${appointment.status.name() == 'WAITING'}">Ch? kh�m</span>
-                        <span class="badge bg-success" th:if="${appointment.status.name() == 'COMPLETED'}">Ho�n th�nh</span>
-                        <span class="badge bg-danger" th:if="${appointment.status.name() == 'CANCELLED'}">�� h?y</span>
+                        <span class="badge bg-warning text-dark" th:if="${appointment.status.name() == 'WAITING'}">Chờ khám</span>
+                        <span class="badge bg-success" th:if="${appointment.status.name() == 'COMPLETED'}">Hoàn thành</span>
+                        <span class="badge bg-danger" th:if="${appointment.status.name() == 'CANCELLED'}">Đã hủy</span>
                         <span class="badge bg-secondary"
                               th:if="${appointment.status.name() != 'WAITING'
                                       and appointment.status.name() != 'COMPLETED'
@@ -101,7 +101,7 @@
                 </tbody>
             </table>
 
-            <a th:href="@{/patient/appointments}" class="btn btn-outline-primary btn-sm">Xem t?t c?</a>
+            <a th:href="@{/patient/appointments}" class="btn btn-outline-primary btn-sm">Xem tất cả</a>
         </div>
     </div>
 

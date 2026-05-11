@@ -2,7 +2,7 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>�?t l?ch kh�m</title>
+    <title>Đặt lịch khám</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -16,8 +16,8 @@
 <div class="container py-4">
 
     <div class="mb-4">
-        <h3>�?t l?ch kh�m</h3>
-        <p class="text-muted mb-0">Ch?n chuy�n khoa, b�c si, ng�y v� khung gi? kh�m.</p>
+        <h3>Đặt lịch khám</h3>
+        <p class="text-muted mb-0">Chọn chuyên khoa, bác sĩ, ngày và khung giờ khám.</p>
     </div>
 
     <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
@@ -31,9 +31,9 @@
                 <input type="hidden" th:field="*{patientId}">
 
                 <div class="mb-3">
-                    <label class="form-label">Chuy�n khoa</label>
+                    <label class="form-label">Chuyên khoa</label>
                     <select class="form-select" id="specialtySelect" th:field="*{specialtyId}" required>
-                        <option value="">-- Ch?n chuy�n khoa --</option>
+                        <option value="">-- Chọn chuyên khoa --</option>
                         <option th:each="specialty : ${specialties}"
                                 th:value="${specialty.id}"
                                 th:text="${specialty.name}">
@@ -42,14 +42,14 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">B�c si</label>
+                    <label class="form-label">Bác sĩ</label>
                     <select class="form-select"
                             id="doctorSelect"
                             th:field="*{doctorId}"
                             th:attr="data-selected-doctor-id=*{doctorId}"
                             required
                             disabled>
-                        <option value="">-- Ch?n chuy�n khoa tru?c --</option>
+                        <option value="">-- Chọn chuyên khoa trước --</option>
                         <option th:each="doctor : ${doctors}"
                                 th:value="${doctor.id}"
                                 th:attr="data-specialty-id=${doctor.specialty.id}"
@@ -60,31 +60,31 @@
 
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label class="form-label">Ng�y kh�m</label>
+                        <label class="form-label">Ngày khám</label>
                         <input type="date" class="form-control" th:field="*{appointmentDate}" required>
                     </div>
 
                     <div class="col-md-6 mb-3">
-                        <label class="form-label">Gi? b?t d?u</label>
+                        <label class="form-label">Giờ bắt đầu</label>
                         <input type="time" class="form-control" th:field="*{startTime}" required>
                     </div>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">L� do kh�m</label>
+                    <label class="form-label">Lý do khám</label>
                     <textarea class="form-control"
                               th:field="*{reason}"
                               rows="4"
-                              placeholder="VD: �au d?u, s?t, ho..."
+                              placeholder="VD: Đau đầu, sốt, ho..."
                               required></textarea>
                 </div>
 
                 <button type="submit" class="btn btn-primary">
-                    X�c nh?n d?t l?ch
+                    Xác nhận đặt lịch
                 </button>
 
                 <a th:href="@{/patient/dashboard}" class="btn btn-secondary">
-                    H?y
+                    Hủy
                 </a>
             </form>
 
@@ -103,8 +103,8 @@
         const specialtyId = specialtySelect.value;
         doctorSelect.disabled = specialtyId === '';
         placeholderOption.textContent = specialtyId === ''
-            ? '-- Ch?n chuy�n khoa tru?c --'
-            : '-- Ch?n b�c si --';
+            ? '-- Chọn chuyên khoa trước --'
+            : '-- Chọn bác sĩ --';
 
         doctorOptions.forEach(option => {
             option.hidden = option.dataset.specialtyId !== specialtyId;

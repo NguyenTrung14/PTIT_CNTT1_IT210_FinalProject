@@ -23,10 +23,23 @@ public class PrescriptionController {
     })
     public String waiting(
             Model model,
-            HttpServletRequest request
+            HttpServletRequest request,
+            HttpSession session
     ) {
-        model.addAttribute("prescriptions", prescriptionService.findWaitingDispense());
-        model.addAttribute("basePath", getBasePath(request));
+        String basePath = getBasePath(request);
+
+        if ("/doctor".equals(basePath)) {
+            User loginUser = (User) session.getAttribute("loginUser");
+            model.addAttribute("prescriptions", prescriptionService.findByDoctorUserId(loginUser.getId()));
+            model.addAttribute("pageTitle", "Đơn thuốc đã kê");
+            model.addAttribute("emptyMessage", "Chưa có đơn thuốc nào.");
+        } else {
+            model.addAttribute("prescriptions", prescriptionService.findWaitingDispense());
+            model.addAttribute("pageTitle", "Đơn thuốc chờ cấp phát");
+            model.addAttribute("emptyMessage", "Không có đơn thuốc nào đang chờ cấp phát.");
+        }
+
+        model.addAttribute("basePath", basePath);
 
         return "admin/prescriptions/waiting";
     }
@@ -38,10 +51,19 @@ public class PrescriptionController {
     public String detail(
             @PathVariable Long id,
             Model model,
-            HttpServletRequest request
+            HttpServletRequest request,
+            HttpSession session
     ) {
-        model.addAttribute("prescription", prescriptionService.findById(id));
-        model.addAttribute("basePath", getBasePath(request));
+        String basePath = getBasePath(request);
+
+        if ("/doctor".equals(basePath)) {
+            User loginUser = (User) session.getAttribute("loginUser");
+            model.addAttribute("prescription", prescriptionService.findByIdForDoctor(id, loginUser.getId()));
+        } else {
+            model.addAttribute("prescription", prescriptionService.findById(id));
+        }
+
+        model.addAttribute("basePath", basePath);
 
         return "admin/prescriptions/detail";
     }

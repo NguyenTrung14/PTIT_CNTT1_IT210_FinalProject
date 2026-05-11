@@ -32,9 +32,20 @@ public class PrescriptionServiceImpl implements PrescriptionService {
     }
 
     @Override
+    public List<Prescription> findByDoctorUserId(Long doctorUserId) {
+        return prescriptionRepository.findFullByDoctorUserIdOrderByCreatedAtDesc(doctorUserId);
+    }
+
+    @Override
     public Prescription findById(Long id) {
         return prescriptionRepository.findFullById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn thuốc"));
+    }
+
+    @Override
+    public Prescription findByIdForDoctor(Long id, Long doctorUserId) {
+        return prescriptionRepository.findFullByIdAndDoctorUserId(id, doctorUserId)
+                .orElseThrow(() -> new RuntimeException("Khong tim thay don thuoc"));
     }
 
     @Override

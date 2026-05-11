@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -106,17 +107,23 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
+    @Transactional
     public List<Appointment> findByPatientId(Long patientId) {
+        rejectOverdueAppointments();
         return appointmentRepository.findByPatientIdOrderByAppointmentTimeAsc(patientId);
     }
 
     @Override
+    @Transactional
     public List<Appointment> findByDoctorId(Long doctorId) {
+        rejectOverdueAppointments();
         return appointmentRepository.findByDoctorIdOrderByAppointmentTimeAsc(doctorId);
     }
 
     @Override
+    @Transactional
     public List<Appointment> findWaitingByDoctorId(Long doctorId) {
+        rejectOverdueAppointments();
         return appointmentRepository.findByDoctorIdAndStatusOrderByAppointmentTimeAsc(
                 doctorId,
                 AppointmentStatus.WAITING.name()
@@ -208,5 +215,34 @@ public class AppointmentServiceImpl implements AppointmentService {
                 MIN_PATIENT_APPOINTMENT_GAP_MINUTES,
                 activeStatuses
         ) > 0;
+    }
+
+    private void rejectOverdueAppointments() {
+        List<AppointmentStatus> expirableStatuses = List.of(
+                AppointmentStatus.PENDING,
+                AppointmentStatus.CONFIRMED,
+                AppointmentStatus.WAITING
+        );
+
+        List<Appointment> overdueAppointments = appointmentRepository.findOverdueAppointments(
+                LocalDate.now(),
+                LocalTime.now(),
+                expirableStatuses
+        );
+
+        for (Appointment appointment : overdueAppointments) {
+            appointment.setStatus(AppointmentStatus.REJECTED);
+            appointment.setCancelReason("Lich kham qua thoi gian nhung benh nhan chua den kham");
+
+            Payment payment = appointment.getPayment();
+            if (payment != null && payment.getStatus() == PaymentStatus.PENDING) {
+                payment.setStatus(PaymentStatus.CANCELLED);
+                payment.setFailureReason("Lich kham qua thoi gian");
+            } else if (payment != null && payment.getStatus() == PaymentStatus.PAID) {
+                payment.setStatus(PaymentStatus.REFUNDED);
+                payment.setRefundedAt(LocalDateTime.now());
+                payment.setFailureReason("Lich kham qua thoi gian nhung benh nhan chua den kham");
+            }
+        }
     }
 }

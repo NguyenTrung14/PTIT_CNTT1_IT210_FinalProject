@@ -12,13 +12,16 @@ import com.example.javaweb_congthongtinbenhvien.entity.enums.PrescriptionStatus;
 import com.example.javaweb_congthongtinbenhvien.repository.AppointmentRepository;
 import com.example.javaweb_congthongtinbenhvien.repository.MedicalRecordRepository;
 import com.example.javaweb_congthongtinbenhvien.repository.MedicineRepository;
+import com.example.javaweb_congthongtinbenhvien.repository.PrescriptionDetailRepository;
 import com.example.javaweb_congthongtinbenhvien.repository.PrescriptionRepository;
 import com.example.javaweb_congthongtinbenhvien.service.MedicalRecordService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +31,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     private final AppointmentRepository appointmentRepository;
     private final PrescriptionRepository prescriptionRepository;
     private final MedicineRepository medicineRepository;
+    private final PrescriptionDetailRepository prescriptionDetailRepository;
 
     @Override
     @Transactional
@@ -83,6 +87,14 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                 .toList();
 
         if (!validDetails.isEmpty()) {
+            Set<Long> prescribedMedicineIds = new HashSet<>();
+
+            for (PrescriptionDetailRequest detailRequest : validDetails) {
+                if (!prescribedMedicineIds.add(detailRequest.getMedicineId())) {
+                    throw new RuntimeException("Thuoc bi trung da ke trong don");
+                }
+            }
+
             Prescription prescription = new Prescription();
             prescription.setMedicalRecord(savedRecord);
             prescription.setStatus(PrescriptionStatus.WAITING_DISPENSE);
@@ -125,8 +137,18 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<MedicalRecord> findByPatientId(Long patientId) {
-        return medicalRecordRepository.findFullHistoryByPatientId(patientId);
+        List<MedicalRecord> records = medicalRecordRepository.findFullHistoryByPatientId(patientId);
+
+        records.stream()
+                .map(MedicalRecord::getPrescription)
+                .filter(prescription -> prescription != null && prescription.getId() != null)
+                .forEach(prescription -> prescription.setDetails(
+                        prescriptionDetailRepository.findFullByPrescriptionId(prescription.getId())
+                ));
+
+        return records;
     }
 
     @Override

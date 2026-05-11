@@ -19,6 +19,7 @@ public interface PrescriptionRepository extends JpaRepository<Prescription, Long
             select distinct p
             from Prescription p
             left join fetch p.medicalRecord mr
+            left join fetch mr.appointment
             left join fetch mr.patient
             left join fetch mr.doctor d
             left join fetch d.user
@@ -29,11 +30,27 @@ public interface PrescriptionRepository extends JpaRepository<Prescription, Long
             """)
     List<Prescription> findFullByStatusOrderByCreatedAtAsc(PrescriptionStatus status);
 
+    @Query("""
+            select distinct p
+            from Prescription p
+            left join fetch p.medicalRecord mr
+            left join fetch mr.appointment
+            left join fetch mr.patient
+            left join fetch mr.doctor d
+            left join fetch d.user
+            left join fetch p.details pd
+            left join fetch pd.medicine
+            where d.user.id = :doctorUserId
+            order by p.createdAt desc
+            """)
+    List<Prescription> findFullByDoctorUserIdOrderByCreatedAtDesc(Long doctorUserId);
+
     
     @Query("""
             select distinct p
             from Prescription p
             left join fetch p.medicalRecord mr
+            left join fetch mr.appointment
             left join fetch mr.patient
             left join fetch mr.doctor d
             left join fetch d.user
@@ -42,4 +59,19 @@ public interface PrescriptionRepository extends JpaRepository<Prescription, Long
             where p.id = :id
             """)
     Optional<Prescription> findFullById(Long id);
+
+    @Query("""
+            select distinct p
+            from Prescription p
+            left join fetch p.medicalRecord mr
+            left join fetch mr.appointment
+            left join fetch mr.patient
+            left join fetch mr.doctor d
+            left join fetch d.user
+            left join fetch p.details pd
+            left join fetch pd.medicine
+            where p.id = :id
+              and d.user.id = :doctorUserId
+            """)
+    Optional<Prescription> findFullByIdAndDoctorUserId(Long id, Long doctorUserId);
 }
